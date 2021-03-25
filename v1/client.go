@@ -17,7 +17,7 @@ func (e ErrMazzaroth) Error() string {
 }
 
 type Mazzaroth interface {
-	TransactionSubmit(signature []byte, signer xdr.Authority, action []byte) (*xdr.TransactionSubmitResponse, error)
+	TransactionSubmit(signature xdr.Signature, signer xdr.Authority, action []byte) (*xdr.TransactionSubmitResponse, error)
 	ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error)
 	TransactionLookUp(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error)
 	ReceiptLookUp(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error)
