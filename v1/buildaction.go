@@ -3,7 +3,7 @@ package mazzaroth
 import "github.com/kochavalabs/mazzaroth-xdr/xdr"
 
 // BuildXDRActionForTransactionCall generates the action in xdr format for a transaction call.
-func BuildXDRActionForTransactionCall(address, channel xdr.ID, nonce uint64, function string, parameters ...string) []byte {
+func BuildXDRActionForTransactionCall(address, channel xdr.ID, nonce uint64, function string, parameters ...xdr.Parameter) []byte {
 	return nil
 }
 
