@@ -16,8 +16,3 @@ func BuildXDRActionForTransactionContractUpdate(address, channel xdr.ID, contrac
 func BuildXDRActionForTransactionConfigUpdate(address, channel xdr.ID, channelID, contractHash, version, owner, channelName string, admins []string) []byte {
 	return nil
 }
-
-// BuildXDRActionForReadOnlyCall generates the action in xdr format for a read only transaction call.
-func BuildXDRActionForReadOnlyCall(address, channel xdr.ID, function string, parameters ...string) []byte {
-	return nil
-}
