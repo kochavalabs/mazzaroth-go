@@ -17,13 +17,13 @@ func (e ErrMazzaroth) Error() string {
 }
 
 type Mazzaroth interface {
-	TransactionSubmit(signature xdr.Signature, signer xdr.Authority, action []byte) (*xdr.TransactionSubmitResponse, error)
+	TransactionSubmit(signature xdr.Signature, signer xdr.Authority, transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error)
 	ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error)
-	TransactionLookUp(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error)
-	ReceiptLookUp(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error)
-	BlockLookUp(blockID xdr.ID) (*xdr.BlockLookupResponse, error)
-	BlockHeaderLookUp(blockID xdr.ID) (*xdr.BlockHeaderLookupResponse, error)
-	AccountInfoLookUp(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
-	NonceLookUp(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error)
-	ChannelInfoLookUp(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error)
+	TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error)
+	ReceiptLookup(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error)
+	BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error)
+	BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error)
+	AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
+	NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error)
+	ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error)
 }

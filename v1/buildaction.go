@@ -2,17 +2,22 @@ package mazzaroth
 
 import "github.com/kochavalabs/mazzaroth-xdr/xdr"
 
-// BuildActionForContractCall generates the action in xdr format for a transaction call.
-func BuildActionForContractCall(address, channel xdr.ID, nonce uint64, function string, parameters ...xdr.Parameter) []byte {
-	return nil
+// BuildActionForTransactionCall generates the action for a transaction call.
+func BuildActionForTransactionCall(address, channel xdr.ID, nonce uint64, call xdr.Call) (*xdr.Action, error) {
+	return nil, nil
 }
 
-// BuildActionForContractUpdate generates the action in xdr format for a contract update transaction.
-func BuildActionForContractUpdate(address, channel xdr.ID, contract, version string) []byte {
-	return nil
+// BuildActionForContractUpdate generates the action for a contract update transaction.
+func BuildActionForContractUpdate(address, channel xdr.ID, contract xdr.Contract) (*xdr.Action, error) {
+	return nil, nil
 }
 
-// BuildActionForConfigUpdate generates the action in xdr format for a config update transaction.
-func BuildActionForConfigUpdate(address, channel xdr.ID, channelID, contractHash, version, owner, channelName string, admins []string) []byte {
-	return nil
+// BuildActionForConfigUpdate generates the action for a config update transaction.
+func BuildActionForConfigUpdate(address, channel xdr.ID, config xdr.ChannelConfig) (*xdr.Action, error) {
+	return nil, nil
+}
+
+// BuildActionForPermissionUpdate generates the action for a permission update transaction.
+func BuildActionForPermissionUpdate(address, channel xdr.ID, nonce uint64, permission xdr.Permission) (*xdr.Action, error) {
+	return nil, nil
 }
