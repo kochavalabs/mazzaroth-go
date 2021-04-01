@@ -1,0 +1,6 @@
+github.com/kochavalabs/mazzaroth-xdr v0.2.5 h1:f2yd9imzWoUg1E0ceHe5SFbaIc2qJrF9bmmbJ0KHwmI=
+github.com/kochavalabs/mazzaroth-xdr v0.2.5/go.mod h1:0clNxqZ+8rf6toSNlUhuDRmbRVIBMiC2hkHD5I74shE=
+github.com/nullstyle/go-xdr v0.0.0-20180726165426-f4c839f75077 h1:A804awGqaW7i61y8KnbtHmh3scqbNuTJqcycq3u5ZAU=
+github.com/nullstyle/go-xdr v0.0.0-20180726165426-f4c839f75077/go.mod h1:sZZi9x5aHXGZ/RRp7Ne5rkvtDxZb7pd7vgVA+gmE35A=
+github.com/stellar/go-xdr v0.0.0-20180917104419-0bc96f33a18e h1:n/hfey8pO+RYMoGXyvyzuw5pdO8IFDoyAL/g5OiCesY=
+github.com/stellar/go-xdr v0.0.0-20180917104419-0bc96f33a18e/go.mod h1:gpOLVzy6TVYTQ3LvHSN9RJC700FkhFCpSE82u37aNRM=
