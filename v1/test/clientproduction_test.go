@@ -177,3 +177,14 @@ func TestAccountNonceLookup(t *testing.T) {
 	require.Equal(t, xdr.NonceLookupStatusFOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Found nonce for account."), resp.StatusInfo)
 }
+
+func TestChannelInfoLookup(t *testing.T) {
+	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
+
+	id := xdr.ChannelInfoTypeCONTRACT
+
+	resp, err := client.ChannelInfoLookup(id)
+	require.NoError(t, err)
+	require.Equal(t, xdr.InfoLookupStatusFOUND, resp.Status)
+	require.Equal(t, xdr.StatusInfo("Found info for channel."), resp.StatusInfo)
+}
