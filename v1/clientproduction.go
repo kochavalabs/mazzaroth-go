@@ -137,7 +137,28 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 }
 
 func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
-	return nil, nil
+	request := xdr.BlockLookupRequest{
+		ID: blockID,
+	}
+
+	xdrRequest, err := request.MarshalBinary()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+	}
+
+	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/block/lookup", xdrRequest)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not call the endpoint")
+	}
+
+	response := xdr.BlockLookupResponse{}
+
+	err = response.UnmarshalBinary(binaryResp)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal the response")
+	}
+
+	return &response, nil
 }
 func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	return nil, nil

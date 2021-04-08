@@ -15,7 +15,6 @@ import (
 )
 
 /*
-ReceiptLookup(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error)
 BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error)
 BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error)
 AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
@@ -103,4 +102,25 @@ func TestReceiptLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.TransactionStatusNOT_FOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("The transaction you looked up was not found."), resp.StatusInfo)
+}
+
+func TestBlockLookup(t *testing.T) {
+	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
+
+	var number uint64
+	var hash xdr.Hash
+
+	number = 5
+	copy(hash[:], bytes.Repeat([]byte{10}, 32))
+
+	id := xdr.Identifier{
+		Type:   xdr.IdentifierTypeHASH,
+		Number: &number,
+		Hash:   &hash,
+	}
+
+	resp, err := client.BlockLookup(id)
+	require.NoError(t, err)
+	require.Equal(t, xdr.BlockStatusNOT_FOUND, resp.Status)
+	require.Equal(t, xdr.StatusInfo("key not found in kv store"), resp.StatusInfo)
 }
