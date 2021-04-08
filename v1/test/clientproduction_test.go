@@ -26,11 +26,12 @@ import (
 
 		2. Deploy the contract.
 
+			cd $HOME/.go/src/github.com/Kochava/full-contract-example
 			mazzaroth-cli deploy deploy.json
 
 		3. Go to the project's root and run the tests as usual.
 
-			cd ../..
+			cd $HOME/.go/src/github.com/Kochava/mazzaroth-go
 			make integration
 */
 
