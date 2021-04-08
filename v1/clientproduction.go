@@ -34,6 +34,7 @@ func NewProductionClientWithDefaultHTTPClient() *ProductionClient {
 	return NewProductionClient(client)
 }
 
+// TransactionSubmit calls the endpoint: /transaction/submit.
 func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
 	transactionRequest := xdr.TransactionSubmitRequest{
 		Transaction: transaction,
@@ -59,6 +60,7 @@ func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr
 	return &transactionResponse, nil
 }
 
+// ReadOnly calls the endpoint: /readonly.
 func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
 	request := xdr.ReadonlyRequest{
 		Call: xdr.Call{
@@ -86,6 +88,8 @@ func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Paramete
 
 	return &response, nil
 }
+
+// TransactionLookup calls the endpoint: /transaction/lookup.
 func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
 	request := xdr.TransactionLookupRequest{
 		TransactionID: transactionID,
@@ -111,6 +115,7 @@ func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transa
 	return &response, nil
 }
 
+// ReceiptLookup calls the endpoint: /receipt/lookup.
 func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
 	request := xdr.ReceiptLookupRequest{
 		TransactionID: transactionID,
@@ -136,6 +141,7 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 	return &response, nil
 }
 
+// BlockLookup calls the endpoint: /block/lookup.
 func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
 	request := xdr.BlockLookupRequest{
 		ID: blockID,
@@ -160,6 +166,8 @@ func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLooku
 
 	return &response, nil
 }
+
+// BlockHeaderLookup calls the endpoint: /block/header/lookup.
 func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	request := xdr.BlockHeaderLookupRequest{
 		ID: blockID,
@@ -184,6 +192,8 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 
 	return &response, nil
 }
+
+// AccountInfoLookup calls the endpoint: /account/info/lookup.
 func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
 	request := xdr.AccountInfoLookupRequest{
 		Account: accountID,
@@ -208,6 +218,8 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 
 	return &response, nil
 }
+
+// NonceLookup calls the endpoint: /account/nonce/lookup.
 func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
 	request := xdr.AccountNonceLookupRequest{
 		Account: accountID,
@@ -233,6 +245,7 @@ func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLook
 	return &response, nil
 }
 
+// ChannelInfoLookup calls the endpoint: /channel/info/lookup.
 func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
 	request := xdr.ChannelInfoLookupRequest{
 		InfoType: channelInfoType,

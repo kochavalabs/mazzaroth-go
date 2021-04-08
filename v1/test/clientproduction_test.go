@@ -35,6 +35,7 @@ import (
 			make integration
 */
 
+// TestTransactionSubmit tests the happy path of the TransactionSubmit method.
 func TestTransactionSubmit(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -84,6 +85,7 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("Transaction has been accepted and is being executed."), resp.StatusInfo)
 }
 
+// TestReadonly tests the happy path of the TestReadonly method.
 func TestReadonly(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -95,6 +97,7 @@ func TestReadonly(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("Readonly request executed successfully."), resp.StatusInfo)
 }
 
+// TestTransactionLookup tests the happy path of the TestTransactionLookup method.
 func TestTransactionLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -106,6 +109,7 @@ func TestTransactionLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("The transaction you looked up was not found."), resp.StatusInfo)
 }
 
+// TestReceiptLookup tests the happy path of the TestReceiptLookup method.
 func TestReceiptLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -117,6 +121,7 @@ func TestReceiptLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("The transaction you looked up was not found."), resp.StatusInfo)
 }
 
+// TestBlockLookup tests the happy path of the TestBlockLookup method.
 func TestBlockLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -138,6 +143,7 @@ func TestBlockLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("key not found in kv store"), resp.StatusInfo)
 }
 
+// TestBlockHeaderLookup tests the happy path of the TestBlockHeaderLookup method.
 func TestBlockHeaderLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -159,6 +165,7 @@ func TestBlockHeaderLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("key not found in kv store"), resp.StatusInfo)
 }
 
+// TestAccountInfoLookup tests the happy path of the TestAccountInfoLookup method.
 func TestAccountInfoLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -175,6 +182,7 @@ func TestAccountInfoLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("Found info for account."), resp.StatusInfo)
 }
 
+// TestAccountNonceLookup tests the happy path of the TestAccountNonceLookup method.
 func TestAccountNonceLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
@@ -191,6 +199,7 @@ func TestAccountNonceLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("Found nonce for account."), resp.StatusInfo)
 }
 
+// TestChannelInfoLookup tests the happy path of the TestChannelInfoLookup method.
 func TestChannelInfoLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
