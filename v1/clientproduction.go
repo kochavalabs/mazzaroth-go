@@ -22,16 +22,16 @@ type ProductionClient struct {
 }
 
 // NewProductionClient creates a production object.
-func NewProductionClient(httpClient http.Client) *ProductionClient {
-	return &ProductionClient{server: "http://localhost:8081"}
+func NewProductionClient(httpClient http.Client, server string) *ProductionClient {
+	return &ProductionClient{server: server}
 }
 
 // NewProductionClientWithDefaultHTTPClient creates a production object.
-func NewProductionClientWithDefaultHTTPClient() *ProductionClient {
+func NewProductionClientWithDefaultHTTPClient(server string) *ProductionClient {
 	client := http.Client{
 		Timeout: 500 * time.Millisecond,
 	}
-	return NewProductionClient(client)
+	return NewProductionClient(client, server)
 }
 
 // TransactionSubmit calls the endpoint: /transaction/submit.
