@@ -161,3 +161,19 @@ func TestAccountInfoLookup(t *testing.T) {
 	require.Equal(t, xdr.InfoLookupStatusFOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Found info for account."), resp.StatusInfo)
 }
+
+func TestAccountNonceLookup(t *testing.T) {
+	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
+
+	var id xdr.ID
+
+	ex, err := hex.DecodeString("dddd")
+	require.NoError(t, err)
+
+	copy(id[:], ex)
+
+	resp, err := client.NonceLookup(id)
+	require.NoError(t, err)
+	require.Equal(t, xdr.NonceLookupStatusFOUND, resp.Status)
+	require.Equal(t, xdr.StatusInfo("Found nonce for account."), resp.StatusInfo)
+}

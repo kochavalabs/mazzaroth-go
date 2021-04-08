@@ -209,7 +209,28 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 	return &response, nil
 }
 func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
-	return nil, nil
+	request := xdr.AccountNonceLookupRequest{
+		Account: accountID,
+	}
+
+	xdrRequest, err := request.MarshalBinary()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+	}
+
+	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/nonce/lookup", xdrRequest)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not call the endpoint")
+	}
+
+	response := xdr.AccountNonceLookupResponse{}
+
+	err = response.UnmarshalBinary(binaryResp)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal the response")
+	}
+
+	return &response, nil
 }
 
 func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
