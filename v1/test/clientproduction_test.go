@@ -15,7 +15,6 @@ import (
 )
 
 /*
-TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error)
 ReceiptLookup(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error)
 BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error)
 BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error)
@@ -85,6 +84,17 @@ func TestReadonly(t *testing.T) {
 }
 
 func TestTransactionLookup(t *testing.T) {
+	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
+
+	var id xdr.ID
+
+	resp, err := client.TransactionLookup(id)
+	require.NoError(t, err)
+	require.Equal(t, xdr.TransactionStatusNOT_FOUND, resp.Status)
+	require.Equal(t, xdr.StatusInfo("The transaction you looked up was not found."), resp.StatusInfo)
+}
+
+func TestReceiptLookup(t *testing.T) {
 	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
 
 	var id xdr.ID
