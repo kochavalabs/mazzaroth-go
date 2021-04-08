@@ -1,3 +1,5 @@
+// +build integration
+
 package mazzarothtest
 
 import (
@@ -16,10 +18,20 @@ import (
 )
 
 /*
-BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error)
-AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
-NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error)
-ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error)
+	How to run these tests:
+
+		1. Run a Mazzaroth node.
+
+			docker run -p 8081:8081 kochavalabs/mazzaroth start standalone
+
+		2. Deploy the contract.
+
+			mazzaroth-cli deploy deploy.json
+
+		3. Go to the project's root and run the tests as usual.
+
+			cd ../..
+			make integration
 */
 
 func TestTransactionSubmit(t *testing.T) {

@@ -1,0 +1,90 @@
+{
+    "abi": {
+        "type": "file",
+        "value": "./contract/target/json/ExampleContract.json"
+    },
+    "channel-id": "0000000000000000000000000000000000000000000000000000000000000000",
+    "channel-name": "Example Channel",
+    "contract": "./contract/target/wasm32-unknown-unknown/release/contract.wasm",
+    "host": "http://localhost:8081",
+    "on-behalof-of": "",
+    "owner": "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29",
+    "init-transactions": {
+        "products-add-get": [
+            {
+                "args": [],
+                "function_name": "setup",
+                "sender": ""
+            },
+            {
+                "args": [
+                    {
+                        "status": 1,
+                        "one": "First String",
+                        "two": "Second String",
+                        "three": "Three String"
+                    },
+                    {
+                        "id": "1111111111111111111111111111111111111111111111111111111111111111"
+                    }
+                ],
+                "function_name": "complex",
+                "sender": ""
+            },
+            {
+                "args": [
+                    {
+                        "status": 1,
+                        "one": "One",
+                        "two": "Two",
+                        "three": "Thre"
+                    }
+                ],
+                "function_name": "insert_foo",
+                "sender": ""
+            },
+            {
+                "args": [
+                    {
+                        "status": 2,
+                        "one": "Uno",
+                        "two": "Dos",
+                        "three": "Tres"
+                    }
+                ],
+                "function_name": "insert_foo",
+                "sender": ""
+            },
+            {
+                "args": [
+                    {
+                        "status": 1,
+                        "one": "yi",
+                        "two": "er",
+                        "three": "san"
+                    }
+                ],
+                "function_name": "insert_foo",
+                "sender": ""
+            },
+            {
+                "args": [
+                    {
+                        "status": 3,
+                        "one": "Un",
+                        "two": "Deux",
+                        "three": "Trois"
+                    }
+                ],
+                "function_name": "insert_foo",
+                "sender": ""
+            },
+            {
+                "args": ["status = 3"],
+                "function_name": "query_foo",
+                "sender": ""
+            }
+        ]
+    },
+    "xdr-types": "./xdrTypes.js"
+}
