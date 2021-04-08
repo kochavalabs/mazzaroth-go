@@ -185,7 +185,28 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 	return &response, nil
 }
 func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
-	return nil, nil
+	request := xdr.AccountInfoLookupRequest{
+		Account: accountID,
+	}
+
+	xdrRequest, err := request.MarshalBinary()
+	if err != nil {
+		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+	}
+
+	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/info/lookup", xdrRequest)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not call the endpoint")
+	}
+
+	response := xdr.AccountInfoLookupResponse{}
+
+	err = response.UnmarshalBinary(binaryResp)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal the response")
+	}
+
+	return &response, nil
 }
 func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
 	return nil, nil

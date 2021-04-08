@@ -3,6 +3,7 @@ package mazzarothtest
 import (
 	"bytes"
 	"crypto/ed25519"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"testing"
@@ -143,4 +144,20 @@ func TestBlockHeaderLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.BlockStatusNOT_FOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("key not found in kv store"), resp.StatusInfo)
+}
+
+func TestAccountInfoLookup(t *testing.T) {
+	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{})
+
+	var id xdr.ID
+
+	ex, err := hex.DecodeString("dddd")
+	require.NoError(t, err)
+
+	copy(id[:], ex)
+
+	resp, err := client.AccountInfoLookup(id)
+	require.NoError(t, err)
+	require.Equal(t, xdr.InfoLookupStatusFOUND, resp.Status)
+	require.Equal(t, xdr.StatusInfo("Found info for account."), resp.StatusInfo)
 }
