@@ -42,7 +42,7 @@ func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr
 
 	xdrRequest, err := transactionRequest.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/transaction/submit", xdrRequest)
@@ -71,7 +71,7 @@ func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Paramete
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/readonly", xdrRequest)
@@ -97,7 +97,7 @@ func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transa
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/transaction/lookup", xdrRequest)
@@ -123,7 +123,7 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/receipt/lookup", xdrRequest)
@@ -149,7 +149,7 @@ func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLooku
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/block/lookup", xdrRequest)
@@ -175,7 +175,7 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/block/header/lookup", xdrRequest)
@@ -201,7 +201,7 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/info/lookup", xdrRequest)
@@ -227,7 +227,7 @@ func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLook
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/nonce/lookup", xdrRequest)
@@ -253,7 +253,7 @@ func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoTyp
 
 	xdrRequest, err := request.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "could not marshall to xdr binary")
+		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
 	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/channel/info/lookup", xdrRequest)
