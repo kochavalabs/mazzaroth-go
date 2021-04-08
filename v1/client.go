@@ -1,20 +1,8 @@
 package mazzaroth
 
 import (
-	"fmt"
-
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
-
-type ErrMazzaroth struct {
-	Code        int
-	Msg         string
-	OriginalErr error
-}
-
-func (e ErrMazzaroth) Error() string {
-	return fmt.Sprintf("mazzaroth error: %d %s %s", e.Code, e.Msg, e.OriginalErr.Error())
-}
 
 type Mazzaroth interface {
 	TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error)
