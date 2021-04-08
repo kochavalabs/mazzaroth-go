@@ -1,5 +1,3 @@
-// +build integration
-
 package mazzarothtest
 
 import (
@@ -200,4 +198,7 @@ func TestChannelInfoLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.InfoLookupStatusFOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Found info for channel."), resp.StatusInfo)
+	require.Equal(t, xdr.ChannelInfoTypeCONTRACT, resp.ChannelInfo.Type)
+	require.NotNil(t, resp.ChannelInfo.Contract.Contract)
+	require.Equal(t, "0.1", resp.ChannelInfo.Contract.Version)
 }
