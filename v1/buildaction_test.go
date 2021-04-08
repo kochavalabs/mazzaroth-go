@@ -7,24 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func IDFromString(s string) xdr.ID {
-	var buffer [32]byte
+func idFromString(s string) xdr.ID {
+	var id xdr.ID
 
-	var maxLenth int = 32
-	if len(s) < maxLenth {
-		maxLenth = len(s)
-	}
+	copy(id[:], s)
 
-	for i := 0; i < len(s); i++ {
-		buffer[i] = byte(s[i])
-	}
-
-	return xdr.ID(buffer)
+	return id
 }
 
+// TestBuildActionForTransactionCall tests the BuildActionForTransactionCall function.
 func TestBuildActionForTransactionCall(t *testing.T) {
-	address := IDFromString("the address")
-	channel := IDFromString("the channel")
+	address := idFromString("the address")
+	channel := idFromString("the channel")
 	nonce := uint64(3)
 
 	var call xdr.Call
@@ -39,9 +33,10 @@ func TestBuildActionForTransactionCall(t *testing.T) {
 	require.Equal(t, xdr.ActionCategoryTypeCALL, *&action.Category.Type)
 }
 
+// TestBuildActionForUpdateContract tests the TestBuildActionForUpdateContract function.
 func TestBuildActionForUpdateContract(t *testing.T) {
-	address := IDFromString("the address")
-	channel := IDFromString("the channel")
+	address := idFromString("the address")
+	channel := idFromString("the channel")
 	nonce := uint64(3)
 
 	var contract xdr.Contract
@@ -56,16 +51,17 @@ func TestBuildActionForUpdateContract(t *testing.T) {
 	require.Equal(t, xdr.ActionCategoryTypeUPDATE, *&action.Category.Type)
 }
 
+// TestBuildActionForUpdateConfig tests the TestBuildActionForUpdateConfig function.
 func TestBuildActionForUpdateConfig(t *testing.T) {
-	address := IDFromString("the address")
-	channel := IDFromString("the channel")
+	address := idFromString("the address")
+	channel := idFromString("the channel")
 	nonce := uint64(3)
 
 	var config xdr.ChannelConfig
-	config.ChannelID = IDFromString("the config address")
+	config.ChannelID = idFromString("the config address")
 	config.ChannelName = "the config channel name"
-	config.Admins = []xdr.ID{IDFromString("admin1"), IDFromString("admin2"), IDFromString("admin3")}
-	config.Owner = IDFromString("the config owner")
+	config.Admins = []xdr.ID{idFromString("admin1"), idFromString("admin2"), idFromString("admin3")}
+	config.Owner = idFromString("the config owner")
 	config.Version = "2.0"
 
 	action := BuildActionForConfigUpdate(address, channel, nonce, config)
@@ -76,13 +72,14 @@ func TestBuildActionForUpdateConfig(t *testing.T) {
 	require.Equal(t, xdr.ActionCategoryTypeUPDATE, *&action.Category.Type)
 }
 
+// TestBuildActionForPermissionUpdate tests the TestBuildActionForPermissionUpdate function.
 func TestBuildActionForPermissionUpdate(t *testing.T) {
-	address := IDFromString("the address")
-	channel := IDFromString("the channel")
+	address := idFromString("the address")
+	channel := idFromString("the channel")
 	nonce := uint64(3)
 
 	var permission xdr.Permission
-	permission.Key = IDFromString("the key")
+	permission.Key = idFromString("the key")
 	permission.Action = 1
 
 	action := BuildActionForPermissionUpdate(address, channel, nonce, permission)
