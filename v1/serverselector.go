@@ -7,7 +7,7 @@ import (
 
 // ServerSelector is the behaviour to select a new server.
 type ServerSelector interface {
-	Peek() string
+	Pick() string
 }
 
 // RoundRobinServerSelector implements a round robin server selection.
@@ -34,8 +34,8 @@ func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, 
 	}, nil
 }
 
-// Peek returs the next server.
-func (rr *RoundRobinServerSelector) Peek() string {
+// Pick returs the next server.
+func (rr *RoundRobinServerSelector) Pick() string {
 	atomic.AddUint64(&rr.current, 1)
 
 	n := (rr.current - 1) % rr.numServers

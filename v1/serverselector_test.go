@@ -12,10 +12,10 @@ func TestRoundRobinServerSelectorHapyPath(t *testing.T) {
 	require.NoError(t, err)
 
 	for i := 0; i < 10; i++ {
-		require.Equal(t, "a", rr.Peek())
-		require.Equal(t, "b", rr.Peek())
-		require.Equal(t, "c", rr.Peek())
-		require.Equal(t, "d", rr.Peek())
+		require.Equal(t, "a", rr.Pick())
+		require.Equal(t, "b", rr.Pick())
+		require.Equal(t, "c", rr.Pick())
+		require.Equal(t, "d", rr.Pick())
 	}
 }
 
