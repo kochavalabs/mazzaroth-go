@@ -23,6 +23,6 @@ func TestRoundRobinServerSelectorHapyPath(t *testing.T) {
 func TestRoundRobinServerDetectsEmptyServerList(t *testing.T) {
 	rr, err := NewRoundRobinServerSelector()
 	require.Error(t, err)
-	require.Equal(t, "could not create the server select with an empty server list", err.Error())
+	require.Equal(t, "could not create the server selector with an empty server list", err.Error())
 	require.Nil(t, rr)
 }

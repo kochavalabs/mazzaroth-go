@@ -24,7 +24,7 @@ func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, 
 	numServers := len(servers)
 
 	if numServers == 0 {
-		return nil, errors.New("could not create the server select with an empty server list")
+		return nil, errors.New("could not create the server selector with an empty server list")
 	}
 
 	return &RoundRobinServerSelector{
