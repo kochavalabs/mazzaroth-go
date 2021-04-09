@@ -14,14 +14,14 @@ type ServerSelector interface {
 type RoundRobinServerSelector struct {
 	current    uint64
 	servers    []string
-	numServers int
+	numServers uint64
 }
 
 // NewRoundRobinServerSelector creates a RoundRobinServerSelector object.
 // If the server list is empty the function fails.
 // It follows a minimalistic approach and it doesn't validate the structure of the server elements passed in.
 func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, error) {
-	numServers := len(servers)
+	numServers := uint64(len(servers))
 
 	if numServers == 0 {
 		return nil, errors.New("could not create the server selector with an empty server list")
@@ -38,7 +38,7 @@ func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, 
 func (rr *RoundRobinServerSelector) Peek() string {
 	atomic.AddUint64(&rr.current, 1)
 
-	n := (rr.current - 1) % uint64(rr.numServers)
+	n := (rr.current - 1) % rr.numServers
 
 	return rr.servers[n]
 }
