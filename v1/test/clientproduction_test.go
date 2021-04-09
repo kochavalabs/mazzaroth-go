@@ -39,7 +39,7 @@ const server = "http://localhost:8081"
 
 // TestTransactionSubmit tests the happy path of the TransactionSubmit method.
 func TestTransactionSubmit(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	foo := xdrtypes.Foo{
 		Status: 100,
@@ -89,7 +89,7 @@ func TestTransactionSubmit(t *testing.T) {
 
 // TestReadonly tests the happy path of the TestReadonly method.
 func TestReadonly(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	function := "simple"
 	parameters := []xdr.Parameter{}
@@ -101,7 +101,7 @@ func TestReadonly(t *testing.T) {
 
 // TestTransactionLookup tests the happy path of the TestTransactionLookup method.
 func TestTransactionLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var id xdr.ID
 
@@ -113,7 +113,7 @@ func TestTransactionLookup(t *testing.T) {
 
 // TestReceiptLookup tests the happy path of the TestReceiptLookup method.
 func TestReceiptLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var id xdr.ID
 
@@ -125,7 +125,7 @@ func TestReceiptLookup(t *testing.T) {
 
 // TestBlockLookup tests the happy path of the TestBlockLookup method.
 func TestBlockLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var number uint64
 	var hash xdr.Hash
@@ -147,7 +147,7 @@ func TestBlockLookup(t *testing.T) {
 
 // TestBlockHeaderLookup tests the happy path of the TestBlockHeaderLookup method.
 func TestBlockHeaderLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var number uint64
 	var hash xdr.Hash
@@ -169,7 +169,7 @@ func TestBlockHeaderLookup(t *testing.T) {
 
 // TestAccountInfoLookup tests the happy path of the TestAccountInfoLookup method.
 func TestAccountInfoLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var id xdr.ID
 
@@ -186,7 +186,7 @@ func TestAccountInfoLookup(t *testing.T) {
 
 // TestAccountNonceLookup tests the happy path of the TestAccountNonceLookup method.
 func TestAccountNonceLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	var id xdr.ID
 
@@ -203,7 +203,7 @@ func TestAccountNonceLookup(t *testing.T) {
 
 // TestChannelInfoLookup tests the happy path of the TestChannelInfoLookup method.
 func TestChannelInfoLookup(t *testing.T) {
-	var client v1.Mazzaroth = v1.NewProductionClient(http.Client{}, server)
+	var client v1.Mazzaroth = v1.NewProductionClient(&http.Client{}, server)
 
 	id := xdr.ChannelInfoTypeCONTRACT
 

@@ -18,12 +18,15 @@ var _ Mazzaroth = &ProductionClient{}
 // ProductionClient is the actual client implementation.
 type ProductionClient struct {
 	server     string
-	httpClient http.Client
+	httpClient *http.Client
 }
 
 // NewProductionClient creates a production object.
-func NewProductionClient(httpClient http.Client, server string) *ProductionClient {
-	return &ProductionClient{server: server}
+func NewProductionClient(httpClient *http.Client, server string) *ProductionClient {
+	return &ProductionClient{
+		httpClient: httpClient,
+		server:     server,
+	}
 }
 
 // NewProductionClientWithDefaultHTTPClient creates a production object.
@@ -31,7 +34,7 @@ func NewProductionClientWithDefaultHTTPClient(server string) *ProductionClient {
 	client := http.Client{
 		Timeout: 500 * time.Millisecond,
 	}
-	return NewProductionClient(client, server)
+	return NewProductionClient(&client, server)
 }
 
 // TransactionSubmit calls the endpoint: /transaction/submit.
@@ -53,11 +56,8 @@ func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr
 	transactionResponse := xdr.TransactionSubmitResponse{}
 
 	err = transactionResponse.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &transactionResponse, nil
+	return &transactionResponse, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // ReadOnly calls the endpoint: /readonly.
@@ -82,11 +82,8 @@ func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Paramete
 	response := xdr.ReadonlyResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // TransactionLookup calls the endpoint: /transaction/lookup.
@@ -108,11 +105,8 @@ func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transa
 	response := xdr.TransactionLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // ReceiptLookup calls the endpoint: /receipt/lookup.
@@ -134,11 +128,8 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 	response := xdr.ReceiptLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // BlockLookup calls the endpoint: /block/lookup.
@@ -160,11 +151,8 @@ func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLooku
 	response := xdr.BlockLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // BlockHeaderLookup calls the endpoint: /block/header/lookup.
@@ -186,11 +174,8 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 	response := xdr.BlockHeaderLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // AccountInfoLookup calls the endpoint: /account/info/lookup.
@@ -212,11 +197,8 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 	response := xdr.AccountInfoLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // NonceLookup calls the endpoint: /account/nonce/lookup.
@@ -238,11 +220,8 @@ func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLook
 	response := xdr.AccountNonceLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
 // ChannelInfoLookup calls the endpoint: /channel/info/lookup.
@@ -264,14 +243,11 @@ func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoTyp
 	response := xdr.ChannelInfoLookupResponse{}
 
 	err = response.UnmarshalBinary(binaryResp)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not unmarshal the response")
-	}
 
-	return &response, nil
+	return &response, errors.Wrap(err, "could not unmarshal the response")
 }
 
-func makeRequest(httpClient http.Client, url string, xdrRequest []byte) ([]byte, error) {
+func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte, error) {
 	b64request := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(xdrRequest)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, strings.NewReader(b64request))
@@ -300,9 +276,6 @@ func makeRequest(httpClient http.Client, url string, xdrRequest []byte) ([]byte,
 	}
 
 	binaryResp, err := base64.StdEncoding.DecodeString(string(b64Resp))
-	if err != nil {
-		return nil, errors.Wrap(err, "could not decode base64 body")
-	}
 
-	return binaryResp, nil
+	return binaryResp, errors.Wrap(err, "could not unmarshal the response")
 }
