@@ -17,20 +17,25 @@ var _ Mazzaroth = &ProductionClient{}
 
 // ProductionClient is the actual client implementation.
 type ProductionClient struct {
-	server     string
-	httpClient *http.Client
+	serverSelector ServerSelector
+	httpClient     *http.Client
 }
 
 // NewProductionClient creates a production object.
-func NewProductionClient(httpClient *http.Client, server string) *ProductionClient {
-	return &ProductionClient{
-		httpClient: httpClient,
-		server:     server,
+func NewProductionClient(httpClient *http.Client, servers ...string) (*ProductionClient, error) {
+	serverSelector, err := NewRoundRobinServerSelector(servers...)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create round robin server selector")
 	}
+
+	return &ProductionClient{
+		httpClient:     httpClient,
+		serverSelector: serverSelector,
+	}, nil
 }
 
 // NewProductionClientWithDefaultHTTPClient creates a production object.
-func NewProductionClientWithDefaultHTTPClient(server string) *ProductionClient {
+func NewProductionClientWithDefaultHTTPClient(server string) (*ProductionClient, error) {
 	client := http.Client{
 		Timeout: 500 * time.Millisecond,
 	}
@@ -48,7 +53,7 @@ func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/transaction/submit", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/transaction/submit", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -74,7 +79,7 @@ func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Paramete
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/readonly", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/readonly", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -97,7 +102,7 @@ func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transa
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/transaction/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/transaction/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -120,7 +125,7 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/receipt/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/receipt/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -143,7 +148,7 @@ func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLooku
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/block/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/block/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -166,7 +171,7 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/block/header/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/block/header/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -189,7 +194,7 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/info/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/account/info/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -212,7 +217,7 @@ func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLook
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/account/nonce/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/account/nonce/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
@@ -235,7 +240,7 @@ func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoTyp
 		return nil, errors.Wrap(err, "could not marshal to xdr binary")
 	}
 
-	binaryResp, err := makeRequest(pc.httpClient, pc.server+"/channel/info/lookup", xdrRequest)
+	binaryResp, err := makeRequest(pc.httpClient, pc.serverSelector.Pick()+"/channel/info/lookup", xdrRequest)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not call the endpoint")
 	}
