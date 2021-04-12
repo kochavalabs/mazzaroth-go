@@ -34,7 +34,7 @@ func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, 
 	}, nil
 }
 
-// Pick returs the next server.
+// Pick returns the next server.
 func (rr *RoundRobinServerSelector) Pick() string {
 	atomic.AddUint64(&rr.current, 1)
 

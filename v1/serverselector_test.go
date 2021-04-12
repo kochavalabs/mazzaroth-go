@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestRoundRobinServerSelectorHapyPath checks the correct behaviour of the component.
-func TestRoundRobinServerSelectorHapyPath(t *testing.T) {
+// TestRoundRobinServerSelectorHappyPath checks the correct behaviour of the component.
+func TestRoundRobinServerSelectorHappyPath(t *testing.T) {
 	rr, err := NewRoundRobinServerSelector("a", "b", "c", "d")
 	require.NoError(t, err)
 
