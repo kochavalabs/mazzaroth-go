@@ -28,13 +28,11 @@ const server = "http://localhost:8081"
 
 		2. Deploy the contract.
 
-			cd $HOME/.go/src/github.com/Kochava/full-contract-example
-			mazzaroth-cli deploy deploy.json
+			cd $HOME/.go/src/github.com/Kochava/full-contract-example && mazzaroth-cli deploy deploy.json
 
 		3. Go to the project's root and run the tests as usual.
 
-			cd $HOME/.go/src/github.com/Kochava/mazzaroth-go
-			make integration
+			cd $HOME/.go/src/github.com/Kochava/mazzaroth-go && make integration
 */
 
 // TestTransactionSubmit tests the happy path of the TransactionSubmit method.
@@ -69,7 +67,8 @@ func TestTransactionSubmit(t *testing.T) {
 		Parameters: []xdr.Parameter{xdr.Parameter(fooBytes)},
 	}
 
-	action := *v1.BuildActionForTransactionCall(address, channel, nonce, call)
+	action, err := v1.BuildActionForTransactionCall(address, channel, nonce, call)
+	require.NoError(t, err)
 	xdrAction, err := action.MarshalBinary()
 	require.NoError(t, err)
 
@@ -78,7 +77,7 @@ func TestTransactionSubmit(t *testing.T) {
 	transaction := xdr.Transaction{
 		Signature: signature,
 		Signer:    xdr.Authority{Type: xdr.AuthorityTypeNONE},
-		Action:    action,
+		Action:    *action,
 	}
 
 	resp, err := client.TransactionSubmit(transaction)

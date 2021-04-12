@@ -25,7 +25,8 @@ func TestBuildActionForTransactionCall(t *testing.T) {
 	call.Function = "foo"
 	call.Parameters = []xdr.Parameter{xdr.Parameter("p1"), xdr.Parameter("p2")}
 
-	action := BuildActionForTransactionCall(address, channel, nonce, call)
+	action, err := BuildActionForTransactionCall(address, channel, nonce, call)
+	require.NoError(t, err)
 	require.Equal(t, address, action.Address)
 	require.Equal(t, channel, action.ChannelID)
 	require.Equal(t, nonce, action.Nonce)
@@ -43,7 +44,8 @@ func TestBuildActionForUpdateContract(t *testing.T) {
 	contract.Version = "1"
 	contract.Contract = []byte("the contract")
 
-	action := BuildActionForContractUpdate(address, channel, nonce, contract)
+	action, err := BuildActionForContractUpdate(address, channel, nonce, contract)
+	require.NoError(t, err)
 	require.Equal(t, address, action.Address)
 	require.Equal(t, channel, action.ChannelID)
 	require.Equal(t, nonce, action.Nonce)
@@ -64,7 +66,8 @@ func TestBuildActionForUpdateConfig(t *testing.T) {
 	config.Owner = idFromString("the config owner")
 	config.Version = "2.0"
 
-	action := BuildActionForConfigUpdate(address, channel, nonce, config)
+	action, err := BuildActionForConfigUpdate(address, channel, nonce, config)
+	require.NoError(t, err)
 	require.Equal(t, address, action.Address)
 	require.Equal(t, channel, action.ChannelID)
 	require.Equal(t, nonce, action.Nonce)
@@ -82,7 +85,8 @@ func TestBuildActionForPermissionUpdate(t *testing.T) {
 	permission.Key = idFromString("the key")
 	permission.Action = 1
 
-	action := BuildActionForPermissionUpdate(address, channel, nonce, permission)
+	action, err := BuildActionForPermissionUpdate(address, channel, nonce, permission)
+	require.NoError(t, err)
 	require.Equal(t, address, action.Address)
 	require.Equal(t, channel, action.ChannelID)
 	require.Equal(t, nonce, action.Nonce)

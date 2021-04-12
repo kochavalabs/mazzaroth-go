@@ -4,6 +4,7 @@ import (
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
+// Mazzaroth is the Mazzaroth's client behaviour.
 type Mazzaroth interface {
 	TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error)
 	ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error)
