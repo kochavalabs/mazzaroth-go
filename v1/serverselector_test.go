@@ -11,12 +11,11 @@ func TestRoundRobinServerSelectorHapyPath(t *testing.T) {
 	rr, err := NewRoundRobinServerSelector("a", "b", "c", "d")
 	require.NoError(t, err)
 
-	for i := 0; i < 10; i++ {
-		require.Equal(t, "a", rr.Pick())
-		require.Equal(t, "b", rr.Pick())
-		require.Equal(t, "c", rr.Pick())
-		require.Equal(t, "d", rr.Pick())
-	}
+	require.Equal(t, "a", rr.Pick())
+	require.Equal(t, "b", rr.Pick())
+	require.Equal(t, "c", rr.Pick())
+	require.Equal(t, "d", rr.Pick())
+	require.Equal(t, "a", rr.Pick())
 }
 
 // TestRoundRobinServerDetectsEmptyServerList checks the constructor function returns an error when an empty list is passed in.
