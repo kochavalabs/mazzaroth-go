@@ -1,4 +1,4 @@
-module mazzaroth-go
+module github.com/kochavalabs/mazzaroth-go
 
 go 1.16
 
