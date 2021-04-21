@@ -13,37 +13,37 @@ import (
 	"github.com/pkg/errors"
 )
 
-var _ Mazzaroth = &ProductionClient{}
+var _ BareClient = &BareClientImpl{}
 
-// ProductionClient is the actual client implementation.
-type ProductionClient struct {
+// BareClientImpl is the actual client implementation.
+type BareClientImpl struct {
 	serverSelector ServerSelector
 	httpClient     *http.Client
 }
 
-// NewProductionClient creates a production object.
-func NewProductionClient(httpClient *http.Client, servers ...string) (*ProductionClient, error) {
+// NewBareClient creates a production object.
+func NewBareClient(httpClient *http.Client, servers ...string) (*BareClientImpl, error) {
 	serverSelector, err := NewRoundRobinServerSelector(servers...)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create round robin server selector")
 	}
 
-	return &ProductionClient{
+	return &BareClientImpl{
 		httpClient:     httpClient,
 		serverSelector: serverSelector,
 	}, nil
 }
 
-// NewProductionClientWithDefaultHTTPClient creates a production object.
-func NewProductionClientWithDefaultHTTPClient(servers ...string) (*ProductionClient, error) {
+// NewBareClientWithDefaultHTTPClient creates a production object.
+func NewBareClientWithDefaultHTTPClient(servers ...string) (*BareClientImpl, error) {
 	client := http.Client{
 		Timeout: 500 * time.Millisecond,
 	}
-	return NewProductionClient(&client, servers...)
+	return NewBareClient(&client, servers...)
 }
 
 // TransactionSubmit calls the endpoint: /transaction/submit.
-func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
+func (pc *BareClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
 	transactionRequest := xdr.TransactionSubmitRequest{
 		Transaction: transaction,
 	}
@@ -66,7 +66,7 @@ func (pc *ProductionClient) TransactionSubmit(transaction xdr.Transaction) (*xdr
 }
 
 // ReadOnly calls the endpoint: /readonly.
-func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
+func (pc *BareClientImpl) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
 	request := xdr.ReadonlyRequest{
 		Call: xdr.Call{
 			Function:   function,
@@ -92,7 +92,7 @@ func (pc *ProductionClient) ReadOnly(function string, parameters ...xdr.Paramete
 }
 
 // TransactionLookup calls the endpoint: /transaction/lookup.
-func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
+func (pc *BareClientImpl) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
 	request := xdr.TransactionLookupRequest{
 		TransactionID: transactionID,
 	}
@@ -115,7 +115,7 @@ func (pc *ProductionClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transa
 }
 
 // ReceiptLookup calls the endpoint: /receipt/lookup.
-func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
+func (pc *BareClientImpl) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
 	request := xdr.ReceiptLookupRequest{
 		TransactionID: transactionID,
 	}
@@ -138,7 +138,7 @@ func (pc *ProductionClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLoo
 }
 
 // BlockLookup calls the endpoint: /block/lookup.
-func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
+func (pc *BareClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
 	request := xdr.BlockLookupRequest{
 		ID: blockID,
 	}
@@ -161,7 +161,7 @@ func (pc *ProductionClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLooku
 }
 
 // BlockHeaderLookup calls the endpoint: /block/header/lookup.
-func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
+func (pc *BareClientImpl) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	request := xdr.BlockHeaderLookupRequest{
 		ID: blockID,
 	}
@@ -184,7 +184,7 @@ func (pc *ProductionClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Bloc
 }
 
 // AccountInfoLookup calls the endpoint: /account/info/lookup.
-func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
+func (pc *BareClientImpl) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
 	request := xdr.AccountInfoLookupRequest{
 		Account: accountID,
 	}
@@ -207,7 +207,7 @@ func (pc *ProductionClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInf
 }
 
 // NonceLookup calls the endpoint: /account/nonce/lookup.
-func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
+func (pc *BareClientImpl) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
 	request := xdr.AccountNonceLookupRequest{
 		Account: accountID,
 	}
@@ -230,7 +230,7 @@ func (pc *ProductionClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLook
 }
 
 // ChannelInfoLookup calls the endpoint: /channel/info/lookup.
-func (pc *ProductionClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
+func (pc *BareClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
 	request := xdr.ChannelInfoLookupRequest{
 		InfoType: channelInfoType,
 	}
