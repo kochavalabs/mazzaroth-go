@@ -71,8 +71,8 @@ func (cl *ClientWithPrivateKeyImpl) TransactionLookup(transactionID xdr.ID) (*xd
 }
 
 // ReceiptLookup calls the endpoint: /receipt/lookup.
-func (cl *ClientWithPrivateKeyImpl) ReceiptLookup(receiptID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
-	return cl.client.ReceiptLookup(receiptID)
+func (cl *ClientWithPrivateKeyImpl) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
+	return cl.client.ReceiptLookup(transactionID)
 }
 
 // BlockLookup calls the endpoint: /block/lookup.
