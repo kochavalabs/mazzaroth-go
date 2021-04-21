@@ -3,3 +3,5 @@ test:
 
 integration:
 	go test ./... -count=1 -tags=integration
+
+testall: test integration

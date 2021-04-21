@@ -35,11 +35,11 @@ func NewProductionClient(httpClient *http.Client, servers ...string) (*Productio
 }
 
 // NewProductionClientWithDefaultHTTPClient creates a production object.
-func NewProductionClientWithDefaultHTTPClient(server string) (*ProductionClient, error) {
+func NewProductionClientWithDefaultHTTPClient(servers ...string) (*ProductionClient, error) {
 	client := http.Client{
 		Timeout: 500 * time.Millisecond,
 	}
-	return NewProductionClient(&client, server)
+	return NewProductionClient(&client, servers...)
 }
 
 // TransactionSubmit calls the endpoint: /transaction/submit.
