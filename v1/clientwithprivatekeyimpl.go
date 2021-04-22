@@ -16,7 +16,7 @@ type ClientWithPrivateKeyImpl struct {
 	privateKey ed25519.PrivateKey
 }
 
-// NewClientWithPrivateKey : builds a client storing your privateKey can be used to mock a real client
+// NewClientWithPrivateKey : builds a client storing your privateKey, accpts a custom-configured http.Client
 func NewClientWithPrivateKey(privateKey ed25519.PrivateKey, httpClient *http.Client, servers ...string) (*ClientWithPrivateKeyImpl, error) {
 	client, err := NewBareClient(httpClient, servers...)
 	if err != nil {
