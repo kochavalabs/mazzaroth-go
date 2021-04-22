@@ -33,7 +33,11 @@ func BuildActionForContractUpdate(address, channel xdr.ID, nonce uint64, contrac
 	retAction.Nonce = nonce
 
 	// The type is safe. No need to check the error.
-	act, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, xdr.Update{Contract: &contract})
+	update, err := xdr.NewUpdate(xdr.UpdateTypeCONTRACT, contract)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create a new update for type UpdateTypeCONTRACT")
+	}
+	act, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, update)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not crate a new action category for contract update")
 	}
