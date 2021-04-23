@@ -40,7 +40,13 @@ func (ab *ActionBuilder) Call(call xdr.Call) (*xdr.Action, error) {
 }
 
 func (ab *ActionBuilder) ContractUpdate(contract xdr.Contract) (*xdr.Action, error) {
-	cat, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, xdr.Update{Contract: &contract})
+
+	update, err := xdr.NewUpdate(xdr.UpdateTypeCONTRACT, contract)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create a new update for type UpdateTypeCONTRACT")
+	}
+
+	cat, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, update)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not crate a new action category for contract update")
 	}
@@ -52,6 +58,15 @@ func (ab *ActionBuilder) PermissionUpdate(permission xdr.Permission) (*xdr.Actio
 	cat, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, xdr.Update{Permission: &permission})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not crate a new action category for permission update")
+	}
+	ab.action.Category = cat
+	return ab.action, nil
+}
+
+func (ab *ActionBuilder) ConfigUpdate(config xdr.ChannelConfig) (*xdr.Action, error) {
+	cat, err := xdr.NewActionCategory(xdr.ActionCategoryTypeUPDATE, xdr.Update{ChannelConfig: &config})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not crate a new action category for config update")
 	}
 	ab.action.Category = cat
 	return ab.action, nil
