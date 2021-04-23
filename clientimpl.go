@@ -1,28 +1,45 @@
+package mazzaroth
 
+import (
+	"context"
+	"encoding/base64"
+	"io"
+	"log"
+	"net/http"
+	"strings"
 
-var _ MazzarothClient = &MazzarothClient{}
+	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/pkg/errors"
+)
+
+var _ Client = &client{}
 
 // MazzarothClient is the actual client implementation.
-type MazzarothClient struct {
+type client struct {
 	serverSelector ServerSelector
 	httpClient     *http.Client
 }
 
 // NewMazzarothClient creates a production object.
-func NewMazzarothClient(opts *Options) (*MazzarothClient, error) {
-	serverSelector, err := NewRoundRobinServerSelector(opts.servers)
+func NewMazzarothClient(options ...Options) (Client, error) {
+	clientOptions := defaultOption()
+	// set all options if supplied
+	for _, opt := range options {
+		opt.apply(clientOptions)
+	}
+
+	serverSelector, err := NewRoundRobinServerSelector(clientOptions.Servers...)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create round robin server selector")
 	}
-
-	return &MazzarothClient{
-		httpClient:     opts.httpClient,
+	return &client{
+		httpClient:     clientOptions.HttpClient,
 		serverSelector: serverSelector,
 	}, nil
 }
 
 // TransactionSubmit calls the endpoint: /transaction/submit.
-func (pc *MazzarothClient) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
+func (pc *client) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
 	transactionRequest := xdr.TransactionSubmitRequest{
 		Transaction: transaction,
 	}
@@ -45,7 +62,7 @@ func (pc *MazzarothClient) TransactionSubmit(transaction xdr.Transaction) (*xdr.
 }
 
 // ReadOnly calls the endpoint: /readonly.
-func (pc *MazzarothClient) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
+func (pc *client) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
 	request := xdr.ReadonlyRequest{
 		Call: xdr.Call{
 			Function:   function,
@@ -71,7 +88,7 @@ func (pc *MazzarothClient) ReadOnly(function string, parameters ...xdr.Parameter
 }
 
 // TransactionLookup calls the endpoint: /transaction/lookup.
-func (pc *MazzarothClient) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
+func (pc *client) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
 	request := xdr.TransactionLookupRequest{
 		TransactionID: transactionID,
 	}
@@ -94,7 +111,7 @@ func (pc *MazzarothClient) TransactionLookup(transactionID xdr.ID) (*xdr.Transac
 }
 
 // ReceiptLookup calls the endpoint: /receipt/lookup.
-func (pc *MazzarothClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
+func (pc *client) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
 	request := xdr.ReceiptLookupRequest{
 		TransactionID: transactionID,
 	}
@@ -117,7 +134,7 @@ func (pc *MazzarothClient) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLook
 }
 
 // BlockLookup calls the endpoint: /block/lookup.
-func (pc *MazzarothClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
+func (pc *client) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
 	request := xdr.BlockLookupRequest{
 		ID: blockID,
 	}
@@ -140,7 +157,7 @@ func (pc *MazzarothClient) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookup
 }
 
 // BlockHeaderLookup calls the endpoint: /block/header/lookup.
-func (pc *MazzarothClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
+func (pc *client) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	request := xdr.BlockHeaderLookupRequest{
 		ID: blockID,
 	}
@@ -163,7 +180,7 @@ func (pc *MazzarothClient) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.Block
 }
 
 // AccountInfoLookup calls the endpoint: /account/info/lookup.
-func (pc *MazzarothClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
+func (pc *client) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
 	request := xdr.AccountInfoLookupRequest{
 		Account: accountID,
 	}
@@ -186,7 +203,7 @@ func (pc *MazzarothClient) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfo
 }
 
 // NonceLookup calls the endpoint: /account/nonce/lookup.
-func (pc *MazzarothClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
+func (pc *client) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
 	request := xdr.AccountNonceLookupRequest{
 		Account: accountID,
 	}
@@ -209,7 +226,7 @@ func (pc *MazzarothClient) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLooku
 }
 
 // ChannelInfoLookup calls the endpoint: /channel/info/lookup.
-func (pc *MazzarothClient) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
+func (pc *client) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
 	request := xdr.ChannelInfoLookupRequest{
 		InfoType: channelInfoType,
 	}

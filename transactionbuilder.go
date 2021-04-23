@@ -1,4 +1,4 @@
-package client
+package mazzaroth
 
 import (
 	"crypto/ed25519"

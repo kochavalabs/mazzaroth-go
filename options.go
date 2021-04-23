@@ -1,4 +1,4 @@
-package client
+package mazzaroth
 
 import (
 	"net/http"
@@ -7,8 +7,8 @@ import (
 
 // mazzarothOptions config options for client
 type mazzarothClientOptions struct {
-	httpClient *http.Client
-	servers    []string
+	HttpClient *http.Client
+	Servers    []string
 }
 
 // Options interface for applying service options
@@ -35,21 +35,22 @@ func newFuncPacketOption(f func(*mazzarothClientOptions)) *funcMazzarothClientOp
 // WithHttpClient used to set the http client that the mazzaroth client should use
 func WithHttpClient(client *http.Client) Options {
 	return newFuncPacketOption(func(o *mazzarothClientOptions) {
-		o.httpClient = client
+		o.HttpClient = client
 	})
 }
 
 // WithHttpClient used to set the http client that the mazzaroth client should use
 func WithServers(servers ...string) Options {
 	return newFuncPacketOption(func(o *mazzarothClientOptions) {
-		o.servers = servers
+		o.Servers = servers
 	})
 }
 
-func defaultPacketOption() *mazzarothClientOptions {
+func defaultOption() *mazzarothClientOptions {
 	return &mazzarothClientOptions{
-		httpClient: &http.Client{
+		HttpClient: &http.Client{
 			Timeout: 500 * time.Millisecond,
 		},
+		Servers: []string{"localhost:8080"},
 	}
 }
