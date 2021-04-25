@@ -8,7 +8,6 @@ import (
 // mazzarothOptions config options for client
 type mazzarothClientOptions struct {
 	HttpClient *http.Client
-	Servers    []string
 }
 
 // Options interface for applying service options
@@ -39,18 +38,10 @@ func WithHttpClient(client *http.Client) Options {
 	})
 }
 
-// WithHttpClient used to set the http client that the mazzaroth client should use
-func WithServers(servers ...string) Options {
-	return newFuncPacketOption(func(o *mazzarothClientOptions) {
-		o.Servers = servers
-	})
-}
-
 func defaultOption() *mazzarothClientOptions {
 	return &mazzarothClientOptions{
 		HttpClient: &http.Client{
 			Timeout: 500 * time.Millisecond,
 		},
-		Servers: []string{"localhost:8080"},
 	}
 }
