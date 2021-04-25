@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"testing"
 
-	v1 "github.com/kochavalabs/mazzaroth-go/v1"
 	xdrtypes "github.com/kochavalabs/mazzaroth-go/v1/test/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 	"github.com/stretchr/testify/require"
 )
 

@@ -11,9 +11,9 @@ type TransactionBuilder struct {
 	tx *xdr.Transaction
 }
 
-func NewTransactionBuilder(tx *xdr.Transaction) *TransactionBuilder {
+func NewTransactionBuilder() *TransactionBuilder {
 	return &TransactionBuilder{
-		tx: tx,
+		tx: &xdr.Transaction{},
 	}
 }
 

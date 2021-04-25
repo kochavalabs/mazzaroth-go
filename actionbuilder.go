@@ -5,13 +5,15 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO : Add go docs and safety checks
+
 type ActionBuilder struct {
 	action *xdr.Action
 }
 
-func NewActionBuilder(action *xdr.Action) *ActionBuilder {
+func NewActionBuilder() *ActionBuilder {
 	return &ActionBuilder{
-		action: action,
+		action: &xdr.Action{},
 	}
 }
 
