@@ -38,6 +38,7 @@ func WithHttpClient(client *http.Client) Options {
 	})
 }
 
+// defaultOption defines a set of default options for the mazzaroth client
 func defaultOption() *mazzarothClientOptions {
 	return &mazzarothClientOptions{
 		HttpClient: &http.Client{

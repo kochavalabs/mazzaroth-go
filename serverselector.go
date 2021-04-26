@@ -1,7 +1,6 @@
 package mazzaroth
 
 import (
-	"errors"
 	"sync/atomic"
 )
 
@@ -22,11 +21,9 @@ type RoundRobinServerSelector struct {
 // It follows a minimalistic approach and it doesn't validate the structure of the server elements passed in.
 func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, error) {
 	numServers := uint64(len(servers))
-
 	if numServers == 0 {
-		return nil, errors.New("could not create the server selector with an empty server list")
+		return nil, ErrEmptyServerList
 	}
-
 	return &RoundRobinServerSelector{
 		current:    0,
 		servers:    servers,
@@ -37,8 +34,6 @@ func NewRoundRobinServerSelector(servers ...string) (*RoundRobinServerSelector, 
 // Pick returns the next server.
 func (rr *RoundRobinServerSelector) Pick() string {
 	atomic.AddUint64(&rr.current, 1)
-
 	n := (rr.current - 1) % rr.numServers
-
 	return rr.servers[n]
 }
