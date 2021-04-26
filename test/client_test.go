@@ -7,11 +7,10 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
-	"net/http"
 	"testing"
 
-	v1 "github.com/kochavalabs/mazzaroth-go/v1"
-	xdrtypes "github.com/kochavalabs/mazzaroth-go/v1/test/xdr"
+	"github.com/kochavalabs/mazzaroth-go"
+	xdrtypes "github.com/kochavalabs/mazzaroth-go/test/xdr"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 	"github.com/stretchr/testify/require"
 )
@@ -36,7 +35,8 @@ const server = "http://localhost:8081"
 
 // TestTransactionSubmit tests the happy path of the TransactionSubmit method.
 func TestTransactionSubmit(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	foo := xdrtypes.Foo{
@@ -67,7 +67,8 @@ func TestTransactionSubmit(t *testing.T) {
 		Parameters: []xdr.Parameter{xdr.Parameter(fooBytes)},
 	}
 
-	action, err := v1.BuildActionForTransactionCall(address, channel, nonce, call)
+	action, err := mazzaroth.NewActionBuilder().WithAddress(address).
+		WithChannel(channel).WithNonce(nonce).Call(call)
 	require.NoError(t, err)
 	xdrAction, err := action.MarshalBinary()
 	require.NoError(t, err)
@@ -88,7 +89,8 @@ func TestTransactionSubmit(t *testing.T) {
 
 // TestReadonly tests the happy path of the TestReadonly method.
 func TestReadonly(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	function := "simple"
@@ -101,7 +103,8 @@ func TestReadonly(t *testing.T) {
 
 // TestTransactionLookup tests the happy path of the TestTransactionLookup method.
 func TestTransactionLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var id xdr.ID
@@ -114,7 +117,8 @@ func TestTransactionLookup(t *testing.T) {
 
 // TestReceiptLookup tests the happy path of the TestReceiptLookup method.
 func TestReceiptLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var id xdr.ID
@@ -127,7 +131,8 @@ func TestReceiptLookup(t *testing.T) {
 
 // TestBlockLookup tests the happy path of the TestBlockLookup method.
 func TestBlockLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var number uint64
@@ -150,7 +155,8 @@ func TestBlockLookup(t *testing.T) {
 
 // TestBlockHeaderLookup tests the happy path of the TestBlockHeaderLookup method.
 func TestBlockHeaderLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var number uint64
@@ -173,7 +179,8 @@ func TestBlockHeaderLookup(t *testing.T) {
 
 // TestAccountInfoLookup tests the happy path of the TestAccountInfoLookup method.
 func TestAccountInfoLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var id xdr.ID
@@ -191,7 +198,8 @@ func TestAccountInfoLookup(t *testing.T) {
 
 // TestAccountNonceLookup tests the happy path of the TestAccountNonceLookup method.
 func TestAccountNonceLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	var id xdr.ID
@@ -209,7 +217,8 @@ func TestAccountNonceLookup(t *testing.T) {
 
 // TestChannelInfoLookup tests the happy path of the TestChannelInfoLookup method.
 func TestChannelInfoLookup(t *testing.T) {
-	client, err := v1.NewProductionClient(&http.Client{}, server)
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
 	require.NoError(t, err)
 
 	id := xdr.ChannelInfoTypeCONTRACT
