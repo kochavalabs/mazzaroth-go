@@ -7,6 +7,10 @@ type UpdatePermissionBuilder struct {
 	permission  *xdr.Permission
 }
 
+func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel [32]byte, nonce uint64) *UpdatePermissionBuilder {
+	return nil
+}
+
 func (upb *UpdatePermissionBuilder) Action(permissionAction int32) *UpdatePermissionBuilder {
 	return nil
 }

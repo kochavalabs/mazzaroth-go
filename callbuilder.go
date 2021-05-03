@@ -8,64 +8,75 @@ import (
 )
 
 type CallBuilder struct {
-	transaction *xdr.Transaction
+	address, channel [32]byte
+	nonce            uint64
+	functionName     string
+	parameters       []xdr.Parameter
+	signer           *xdr.Authority
 }
 
+//Call
 func (cb *CallBuilder) Call(address, channel [32]byte, nonce uint64) *CallBuilder {
-	if cb.transaction == nil {
-		cb.transaction = new(xdr.Transaction)
+	cb.address = address
+	cb.channel = channel
+	cb.nonce = nonce
+	return cb
+}
+
+//Function
+func (cb *CallBuilder) Function(name string) *CallBuilder {
+	cb.functionName = name
+	return cb
+}
+
+//Parameters
+func (cb *CallBuilder) Parameters(f ...Field) *CallBuilder {
+	for _, field := range f {
+		cb.parameters =
+			append(cb.parameters, xdr.Parameter(field))
 	}
-	call := new(xdr.Call)
-	cb.transaction.Action = xdr.Action{
+	return cb
+}
+
+//Sign
+func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+	// check required values
+	if len(cb.functionName) <= 0 {
+		return nil, ErrEmptyFunctionName
+	}
+
+	action := xdr.Action{
+		Address:   xdr.ID(cb.address),
+		ChannelID: xdr.ID(cb.channel),
+		Nonce:     cb.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeCALL,
-			Call: call,
+			Call: &xdr.Call{
+				Function:   cb.functionName,
+				Parameters: cb.parameters,
+			},
 		},
 	}
-	return cb
-}
 
-func (cb *CallBuilder) Function(name string) *CallBuilder {
-	if cb.transaction.Action.Category.Call == nil {
-		cb.transaction.Action.Category.Call = new(xdr.Call)
-	}
-	cb.transaction.Action.Category.Call.Function = name
-	return cb
-}
-
-func (cb *CallBuilder) Parameters(f ...Field) *CallBuilder {
-	if cb.transaction.Action.Category.Call == nil {
-		cb.transaction.Action.Category.Call = new(xdr.Call)
-	}
-	for _, field := range f {
-		cb.transaction.Action.Category.Call.Parameters =
-			append(cb.transaction.Action.Category.Call.Parameters, xdr.Parameter(field))
-	}
-	return cb
-}
-
-func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
-
-	if len(cb.transaction.Action.Category.Call.Function) <= 0 {
-		return nil, errors.New("Missing required function name")
-	}
-
-	actionStream, err := cb.transaction.Action.MarshalBinary()
+	actionStream, err := action.MarshalBinary()
 	if err != nil {
 		return nil, errors.Wrap(err, "in action.MarshalBinary")
 	}
 
 	signatureSlice := ed25519.Sign(pk, actionStream)
+
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		return nil, errors.Wrap(err, "in signing the transaction")
 	}
-	cb.transaction.Signature = signature
-	if &cb.transaction.Signer == nil {
-		cb.transaction.Signer, err = xdr.NewAuthority(xdr.AuthorityTypeNONE, nil)
-		if err != nil {
-			return nil, errors.Wrap(err, "in xdr.NewAuthority(xdr.AuthorityTypeNONE)")
-		}
+
+	transaction := &xdr.Transaction{
+		Signature: signature,
+		Action:    action,
 	}
-	return cb.transaction, nil
+
+	if cb.signer != nil {
+		transaction.Signer = *cb.signer
+	}
+	return transaction, nil
 }

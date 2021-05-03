@@ -6,7 +6,10 @@ import (
 
 type UpdateContractBuilder struct {
 	transaction *xdr.Transaction
-	contract    *xdr.Contract
+}
+
+func (ucb *UpdateContractBuilder) UpdateContract(address, channel [32]byte, nonce uint64) *UpdateContractBuilder {
+	return nil
 }
 
 func (ucb *UpdateContractBuilder) Contract(b []byte) *UpdateContractBuilder {

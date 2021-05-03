@@ -11,4 +11,6 @@ var (
 	ErrActionAddressNil = errors.New("action address can not be nil")
 	//ErrChannelIDNil triggered if action channel id is nil
 	ErrChannelIDNil = errors.New("action channel id can not be nil")
+	//ErrEmptyFunction name triggered if an empty function name is used to sign a call transaction
+	ErrEmptyFunctionName = errors.New("function name can not be empty")
 )
