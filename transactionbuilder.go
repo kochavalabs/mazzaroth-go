@@ -16,24 +16,27 @@ import (
 // TransactionBuilder builds a xdr transaction object. This is a helper struct
 // that will build a transaction object.
 type TransactionBuilder struct {
-	transaction *xdr.Transaction
+	transaction             *xdr.Transaction
+	callbuilder             *CallBuilder
+	UpdateConfigBuilder     *UpdateConfigBuilder
+	UpdateContractBuilder   *UpdateContractBuilder
+	UpdatePermissionBuilder *UpdatePermissionBuilder
 }
 
 // Transaction returns a transactionBuilder with a empty xdr.transaction
 func Transaction() *TransactionBuilder {
 	return &TransactionBuilder{
 		transaction: &xdr.Transaction{},
+		callbuilder: &CallBuilder{},
 	}
 }
-func (txb *TransactionBuilder) Call() *CallBuilder {
-	call := new(xdr.Call)
-	cat, _ := xdr.NewActionCategory(xdr.ActionCategoryTypeCALL, call)
-	txb.transaction.Action = xdr.Action{
-		Category: cat,
-	}
-	return &CallBuilder{
-		transaction: txb.transaction,
-	}
+
+func (txb *TransactionBuilder) Authorization(id [32]byte) *TransactionBuilder {
+	return nil
+}
+
+func (txb *TransactionBuilder) Call(address, channel [32]byte, nonce uint64) *CallBuilder {
+	return txb.callbuilder.Call(address, channel, nonce)
 }
 
 func (txb *TransactionBuilder) UpdateConfig() *UpdateConfigBuilder {

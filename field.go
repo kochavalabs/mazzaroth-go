@@ -54,6 +54,9 @@ func Bytes(b []byte) Field {
 
 func JsonBytes(b []byte) Field {
 	s := string(b)
-	final, _ := json.Marshal(s)
+	final, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
 	return Field(final)
 }

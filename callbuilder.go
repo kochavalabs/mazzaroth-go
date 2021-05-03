@@ -11,6 +11,20 @@ type CallBuilder struct {
 	transaction *xdr.Transaction
 }
 
+func (cb *CallBuilder) Call(address, channel [32]byte, nonce uint64) *CallBuilder {
+	if cb.transaction == nil {
+		cb.transaction = new(xdr.Transaction)
+	}
+	call := new(xdr.Call)
+	cb.transaction.Action = xdr.Action{
+		Category: xdr.ActionCategory{
+			Type: xdr.ActionCategoryTypeCALL,
+			Call: call,
+		},
+	}
+	return cb
+}
+
 func (cb *CallBuilder) Function(name string) *CallBuilder {
 	if cb.transaction.Action.Category.Call == nil {
 		cb.transaction.Action.Category.Call = new(xdr.Call)
@@ -27,12 +41,12 @@ func (cb *CallBuilder) Parameters(f ...Field) *CallBuilder {
 		cb.transaction.Action.Category.Call.Parameters =
 			append(cb.transaction.Action.Category.Call.Parameters, xdr.Parameter(field))
 	}
-	return nil
+	return cb
 }
 
 func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 
-	if len(cb.transaction.Action.Category.Call.Function) > 0 {
+	if len(cb.transaction.Action.Category.Call.Function) <= 0 {
 		return nil, errors.New("Missing required function name")
 	}
 
