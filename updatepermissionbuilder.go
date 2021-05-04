@@ -1,10 +1,16 @@
 package mazzaroth
 
-import "github.com/kochavalabs/mazzaroth-xdr/xdr"
+import (
+	"crypto/ed25519"
+
+	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/pkg/errors"
+)
 
 type UpdatePermissionBuilder struct {
-	transaction *xdr.Transaction
-	permission  *xdr.Permission
+	address, channel [32]byte
+	nonce            uint64
+	signer           *xdr.Authority
 }
 
 func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel [32]byte, nonce uint64) *UpdatePermissionBuilder {
@@ -19,6 +25,39 @@ func (upb *UpdatePermissionBuilder) Address(address [32]byte) *UpdatePermissionB
 	return nil
 }
 
-func (upb *UpdatePermissionBuilder) Sign() (*xdr.Transaction, error) {
-	return nil, nil
+func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+	action := xdr.Action{
+		Address:   xdr.ID(upb.address),
+		ChannelID: xdr.ID(upb.channel),
+		Nonce:     upb.nonce,
+		Category: xdr.ActionCategory{
+			Type: xdr.ActionCategoryTypeUPDATE,
+			Update: &xdr.Update{
+				Type:       xdr.UpdateTypePERMISSION,
+				Permission: &xdr.Permission{},
+			},
+		},
+	}
+
+	actionStream, err := action.MarshalBinary()
+	if err != nil {
+		return nil, errors.Wrap(err, "in action.MarshalBinary")
+	}
+
+	signatureSlice := ed25519.Sign(pk, actionStream)
+
+	signature, err := xdr.SignatureFromSlice(signatureSlice)
+	if err != nil {
+		return nil, errors.Wrap(err, "in signing the transaction")
+	}
+
+	transaction := &xdr.Transaction{
+		Signature: signature,
+		Action:    action,
+	}
+
+	if upb.signer != nil {
+		transaction.Signer = *upb.signer
+	}
+	return transaction, nil
 }

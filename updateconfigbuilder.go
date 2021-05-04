@@ -10,7 +10,7 @@ import (
 type UpdateConfigBuilder struct {
 	address, channel [32]byte
 	nonce            uint64
-	signer           xdr.Authority
+	signer           *xdr.Authority
 }
 
 func (ucb *UpdateConfigBuilder) UpdateConfig(address, channel [32]byte, nonce uint64) *UpdateConfigBuilder {
@@ -46,11 +46,14 @@ func (ucb *UpdateConfigBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, e
 			},
 		},
 	}
+
 	actionStream, err := action.MarshalBinary()
 	if err != nil {
 		return nil, errors.Wrap(err, "in action.MarshalBinary")
 	}
+
 	signatureSlice := ed25519.Sign(pk, actionStream)
+
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		return nil, errors.Wrap(err, "in signing the transaction")
@@ -60,11 +63,9 @@ func (ucb *UpdateConfigBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, e
 		Signature: signature,
 		Action:    action,
 	}
-	if &transaction.Signer == nil {
-		transaction.Signer, err = xdr.NewAuthority(xdr.AuthorityTypeNONE, nil)
-		if err != nil {
-			return nil, errors.Wrap(err, "in xdr.NewAuthority(xdr.AuthorityTypeNONE)")
-		}
+
+	if ucb.signer != nil {
+		transaction.Signer = *ucb.signer
 	}
-	return nil, nil
+	return transaction, nil
 }
