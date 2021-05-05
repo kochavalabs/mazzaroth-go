@@ -8,9 +8,12 @@ import (
 )
 
 type UpdateConfigBuilder struct {
-	address, channel [32]byte
+	address, channel xdr.ID
 	nonce            uint64
 	signer           *xdr.Authority
+	ownerAddress     xdr.ID
+	channelName      string
+	adminAddresses   []xdr.ID
 }
 
 func (ucb *UpdateConfigBuilder) UpdateConfig(address, channel [32]byte, nonce uint64) *UpdateConfigBuilder {
@@ -20,29 +23,38 @@ func (ucb *UpdateConfigBuilder) UpdateConfig(address, channel [32]byte, nonce ui
 	return ucb
 }
 
-func (ucb *UpdateConfigBuilder) Owner(ID [32]byte) *UpdateConfigBuilder {
-	return nil
+func (ucb *UpdateConfigBuilder) Owner(address [32]byte) *UpdateConfigBuilder {
+	ucb.ownerAddress = address
+	return ucb
 }
 
 func (ucb *UpdateConfigBuilder) ChannelName(name string) *UpdateConfigBuilder {
-	return nil
+	ucb.channelName = name
+	return ucb
 }
 
-func (ucb *UpdateConfigBuilder) Admins(IDs [][32]byte) *UpdateConfigBuilder {
-	return nil
+func (ucb *UpdateConfigBuilder) Admins(addresses ...[32]byte) *UpdateConfigBuilder {
+	for _, address := range addresses {
+		ucb.adminAddresses = append(ucb.adminAddresses, xdr.ID(address))
+	}
+	return ucb
 }
 
 func (ucb *UpdateConfigBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 
 	action := xdr.Action{
-		Address:   xdr.ID(ucb.address),
-		ChannelID: xdr.ID(ucb.channel),
+		Address:   ucb.address,
+		ChannelID: ucb.channel,
 		Nonce:     ucb.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
-				Type:          xdr.UpdateTypeCONFIG,
-				ChannelConfig: &xdr.ChannelConfig{},
+				Type: xdr.UpdateTypeCONFIG,
+				ChannelConfig: &xdr.ChannelConfig{
+					Owner:       ucb.ownerAddress,
+					ChannelName: ucb.channelName,
+					Admins:      ucb.adminAddresses,
+				},
 			},
 		},
 	}

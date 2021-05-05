@@ -19,8 +19,8 @@ func Transaction() *TransactionBuilder {
 }
 
 // Authority - call out public key
-func (txb *TransactionBuilder) Authority(address [32]byte) *TransactionBuilder {
-	origin := xdr.ID(address)
+func (txb *TransactionBuilder) Authority(address xdr.ID) *TransactionBuilder {
+	origin := address
 	txb.authority = &xdr.Authority{
 		Type:   xdr.AuthorityTypePERMISSIONED,
 		Origin: &origin,
@@ -28,7 +28,7 @@ func (txb *TransactionBuilder) Authority(address [32]byte) *TransactionBuilder {
 	return nil
 }
 
-func (txb *TransactionBuilder) Call(address, channel [32]byte, nonce uint64) *CallBuilder {
+func (txb *TransactionBuilder) Call(address, channel xdr.ID, nonce uint64) *CallBuilder {
 	callbuilder := new(CallBuilder)
 	if txb.authority != nil {
 		callbuilder.signer = txb.authority
@@ -36,17 +36,17 @@ func (txb *TransactionBuilder) Call(address, channel [32]byte, nonce uint64) *Ca
 	return callbuilder.Call(address, channel, nonce)
 }
 
-func (txb *TransactionBuilder) UpdateConfig(address, channel [32]byte, nonce uint64) *UpdateConfigBuilder {
+func (txb *TransactionBuilder) UpdateConfig(address, channel xdr.ID, nonce uint64) *UpdateConfigBuilder {
 	updateConfigBuilder := new(UpdateConfigBuilder)
 	return updateConfigBuilder.UpdateConfig(address, channel, nonce)
 }
 
-func (txb *TransactionBuilder) UpdateContract(address, channel [32]byte, nonce uint64) *UpdateContractBuilder {
+func (txb *TransactionBuilder) UpdateContract(address, channel xdr.ID, nonce uint64) *UpdateContractBuilder {
 	updateContractBuilder := new(UpdateContractBuilder)
 	return updateContractBuilder.UpdateContract(address, channel, nonce)
 }
 
-func (txb *TransactionBuilder) UpdatePermission(address, channel [32]byte, nonce uint64) *UpdatePermissionBuilder {
+func (txb *TransactionBuilder) UpdatePermission(address, channel xdr.ID, nonce uint64) *UpdatePermissionBuilder {
 	updatePermissionBuilder := new(UpdatePermissionBuilder)
 	return updatePermissionBuilder.UpdatePermission(address, channel, nonce)
 }

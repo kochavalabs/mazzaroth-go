@@ -8,7 +8,7 @@ import (
 )
 
 type CallBuilder struct {
-	address, channel [32]byte
+	address, channel xdr.ID
 	nonce            uint64
 	functionName     string
 	parameters       []xdr.Parameter
@@ -16,7 +16,7 @@ type CallBuilder struct {
 }
 
 //Call
-func (cb *CallBuilder) Call(address, channel [32]byte, nonce uint64) *CallBuilder {
+func (cb *CallBuilder) Call(address, channel xdr.ID, nonce uint64) *CallBuilder {
 	cb.address = address
 	cb.channel = channel
 	cb.nonce = nonce
@@ -46,8 +46,8 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 	}
 
 	action := xdr.Action{
-		Address:   xdr.ID(cb.address),
-		ChannelID: xdr.ID(cb.channel),
+		Address:   cb.address,
+		ChannelID: cb.channel,
 		Nonce:     cb.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeCALL,
