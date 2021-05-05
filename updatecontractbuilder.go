@@ -33,6 +33,10 @@ func (ucb *UpdateContractBuilder) Version(version string) *UpdateContractBuilder
 }
 
 func (ucb *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+	if (len(ucb.contract) > 0) || ucb.version == "" {
+		return nil, errors.New("missing require fields")
+	}
+
 	action := xdr.Action{
 		Address:   xdr.ID(ucb.address),
 		ChannelID: xdr.ID(ucb.channel),

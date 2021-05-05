@@ -11,21 +11,29 @@ type UpdatePermissionBuilder struct {
 	address, channel [32]byte
 	nonce            uint64
 	signer           *xdr.Authority
+	permissionAction xdr.PermissionAction
+	key              xdr.ID
 }
 
 func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel [32]byte, nonce uint64) *UpdatePermissionBuilder {
-	return nil
+	upb.address = address
+	upb.channel = channel
+	upb.nonce = nonce
+	return upb
 }
 
 func (upb *UpdatePermissionBuilder) Action(permissionAction int32) *UpdatePermissionBuilder {
-	return nil
+	upb.permissionAction = xdr.PermissionAction(permissionAction)
+	return upb
 }
 
 func (upb *UpdatePermissionBuilder) Address(address [32]byte) *UpdatePermissionBuilder {
-	return nil
+	upb.key = xdr.ID(address)
+	return upb
 }
 
 func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+
 	action := xdr.Action{
 		Address:   xdr.ID(upb.address),
 		ChannelID: xdr.ID(upb.channel),
@@ -33,8 +41,11 @@ func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transactio
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
-				Type:       xdr.UpdateTypePERMISSION,
-				Permission: &xdr.Permission{},
+				Type: xdr.UpdateTypePERMISSION,
+				Permission: &xdr.Permission{
+					Action: upb.permissionAction,
+					Key:    upb.key,
+				},
 			},
 		},
 	}
