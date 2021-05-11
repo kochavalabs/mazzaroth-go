@@ -6,7 +6,7 @@ import "github.com/kochavalabs/mazzaroth-xdr/xdr"
 // endpoints exposed by a mazzaroth readonly node.
 type Client interface {
 	TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error)
-	ReadOnly(function string, field ...Field) (*xdr.ReadonlyResponse, error)
+	ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error)
 	TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error)
 	ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error)
 	BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error)

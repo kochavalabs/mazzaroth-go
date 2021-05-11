@@ -15,39 +15,39 @@ type UpdateContractBuilder struct {
 	version          string
 }
 
-func (ucb *UpdateContractBuilder) UpdateContract(address, channel xdr.ID, nonce uint64) *UpdateContractBuilder {
-	ucb.address = address
-	ucb.channel = channel
-	ucb.nonce = nonce
-	return nil
+func (ub *UpdateContractBuilder) UpdateContract(address, channel xdr.ID, nonce uint64) *UpdateContractBuilder {
+	ub.address = address
+	ub.channel = channel
+	ub.nonce = nonce
+	return ub
 }
 
-func (ucb *UpdateContractBuilder) Contract(b []byte) *UpdateContractBuilder {
-	ucb.contract = b
-	return nil
+func (ub *UpdateContractBuilder) Contract(b []byte) *UpdateContractBuilder {
+	ub.contract = b
+	return ub
 }
 
-func (ucb *UpdateContractBuilder) Version(version string) *UpdateContractBuilder {
-	ucb.version = version
-	return nil
+func (ub *UpdateContractBuilder) Version(version string) *UpdateContractBuilder {
+	ub.version = version
+	return ub
 }
 
-func (ucb *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
-	if (len(ucb.contract) > 0) || ucb.version == "" {
+func (ub *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+	if (len(ub.contract) < 0) || ub.version == "" {
 		return nil, errors.New("missing require fields")
 	}
 
 	action := xdr.Action{
-		Address:   ucb.address,
-		ChannelID: ucb.channel,
-		Nonce:     ucb.nonce,
+		Address:   ub.address,
+		ChannelID: ub.channel,
+		Nonce:     ub.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONTRACT,
 				Contract: &xdr.Contract{
-					Contract: ucb.contract,
-					Version:  ucb.version,
+					Contract: ub.contract,
+					Version:  ub.version,
 				},
 			},
 		},
@@ -70,8 +70,8 @@ func (ucb *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction,
 		Action:    action,
 	}
 
-	if ucb.signer != nil {
-		transaction.Signer = *ucb.signer
+	if ub.signer != nil {
+		transaction.Signer = *ub.signer
 	}
 	return transaction, nil
 }

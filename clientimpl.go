@@ -63,12 +63,7 @@ func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Transa
 }
 
 // ReadOnly calls the endpoint: /readonly.
-func (c *ClientImpl) ReadOnly(function string, field ...Field) (*xdr.ReadonlyResponse, error) {
-	var parameters []xdr.Parameter
-	for _, field := range field {
-		parameters =
-			append(parameters, xdr.Parameter(field))
-	}
+func (c *ClientImpl) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
 	request := xdr.ReadonlyRequest{
 		Call: xdr.Call{
 			Function:   function,

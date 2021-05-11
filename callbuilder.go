@@ -30,11 +30,8 @@ func (cb *CallBuilder) Function(name string) *CallBuilder {
 }
 
 //Parameters
-func (cb *CallBuilder) Parameters(f ...Field) *CallBuilder {
-	for _, field := range f {
-		cb.parameters =
-			append(cb.parameters, xdr.Parameter(field))
-	}
+func (cb *CallBuilder) Parameters(parameters ...xdr.Parameter) *CallBuilder {
+	cb.parameters = parameters
 	return cb
 }
 
