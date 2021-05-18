@@ -32,13 +32,8 @@ func Uint64(u uint64) xdr.Parameter {
 	return xdr.Parameter(s)
 }
 
-func Float32(f float32) xdr.Parameter {
-	s := strconv.FormatFloat(float64(f), 'E', -1, 32)
-	return xdr.Parameter(s)
-}
-
 func Float64(f float64) xdr.Parameter {
-	s := strconv.FormatFloat(f, 'E', -1, 64)
+	s := strconv.FormatFloat(f, 'e', -1, 64)
 	return xdr.Parameter(s)
 }
 
