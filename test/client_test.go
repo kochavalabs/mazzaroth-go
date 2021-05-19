@@ -64,6 +64,7 @@ func TestTransactionSubmit(t *testing.T) {
 
 	tx, err := mazzaroth.Transaction().Call(address, channel, nonce).
 		Function("insert_foo").Parameters([]xdr.Parameter{xdr.Parameter(fooBytes)}...).Sign(privateKey)
+	require.NoError(t, err)
 	resp, err := client.TransactionSubmit(*tx)
 	require.NoError(t, err)
 	require.Equal(t, xdr.TransactionStatusACCEPTED, resp.Status)
