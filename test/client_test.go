@@ -55,33 +55,16 @@ func TestTransactionSubmit(t *testing.T) {
 	require.True(t, ok)
 
 	var (
-		address   xdr.ID
-		channel   xdr.ID
-		signature xdr.Signature
+		address xdr.ID
+		channel xdr.ID
 	)
 
 	copy(address[:], pubKey)
 	nonce := uint64(2000)
-	call := xdr.Call{
-		Function:   "insert_foo",
-		Parameters: []xdr.Parameter{xdr.Parameter(fooBytes)},
-	}
 
-	action, err := mazzaroth.NewActionBuilder().WithAddress(address).
-		WithChannel(channel).WithNonce(nonce).Call(call)
-	require.NoError(t, err)
-	xdrAction, err := action.MarshalBinary()
-	require.NoError(t, err)
-
-	copy(signature[:], ed25519.Sign(privateKey, xdrAction))
-
-	transaction := xdr.Transaction{
-		Signature: signature,
-		Signer:    xdr.Authority{Type: xdr.AuthorityTypeNONE},
-		Action:    *action,
-	}
-
-	resp, err := client.TransactionSubmit(transaction)
+	tx, err := mazzaroth.Transaction().Call(address, channel, nonce).
+		Function("insert_foo").Parameters([]xdr.Parameter{xdr.Parameter(fooBytes)}...).Sign(privateKey)
+	resp, err := client.TransactionSubmit(*tx)
 	require.NoError(t, err)
 	require.Equal(t, xdr.TransactionStatusACCEPTED, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Transaction has been accepted and is being executed."), resp.StatusInfo)
