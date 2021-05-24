@@ -44,7 +44,7 @@ func TestUpdateContractBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ub := new(UpdateContractBuilder)
-	tx, err := ub.UpdateContract(testAddress, testChannel, 0).
+	tx, err := ub.UpdateContract(&testAddress, &testChannel, 0).
 		Contract([]byte("example")).
 		Version("1").Sign(privateKey)
 	if err != nil {

@@ -8,14 +8,14 @@ import (
 )
 
 type UpdateContractBuilder struct {
-	address, channel xdr.ID
+	address, channel *xdr.ID
 	nonce            uint64
 	signer           *xdr.Authority
 	contract         []byte
 	version          string
 }
 
-func (ub *UpdateContractBuilder) UpdateContract(address, channel xdr.ID, nonce uint64) *UpdateContractBuilder {
+func (ub *UpdateContractBuilder) UpdateContract(address, channel *xdr.ID, nonce uint64) *UpdateContractBuilder {
 	ub.address = address
 	ub.channel = channel
 	ub.nonce = nonce
@@ -38,8 +38,8 @@ func (ub *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, 
 	}
 
 	action := xdr.Action{
-		Address:   ub.address,
-		ChannelID: ub.channel,
+		Address:   *ub.address,
+		ChannelID: *ub.channel,
 		Nonce:     ub.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,

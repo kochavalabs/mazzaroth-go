@@ -44,7 +44,7 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ub := new(UpdatePermissionBuilder)
-	tx, err := ub.UpdatePermission(testAddress, testChannel, 0).
+	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0).
 		Action(1).
 		Address(testAddress).Sign(privateKey)
 	if err != nil {
