@@ -3,19 +3,20 @@ package mazzaroth
 import (
 	"crypto/ed25519"
 
+	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 	"github.com/pkg/errors"
 )
 
 type UpdateContractBuilder struct {
-	address, channel xdr.ID
+	address, channel *xdr.ID
 	nonce            uint64
 	signer           *xdr.Authority
 	contract         []byte
 	version          string
 }
 
-func (ub *UpdateContractBuilder) UpdateContract(address, channel xdr.ID, nonce uint64) *UpdateContractBuilder {
+func (ub *UpdateContractBuilder) UpdateContract(address, channel *xdr.ID, nonce uint64) *UpdateContractBuilder {
 	ub.address = address
 	ub.channel = channel
 	ub.nonce = nonce
@@ -37,17 +38,24 @@ func (ub *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, 
 		return nil, errors.New("missing require fields")
 	}
 
+	hasher := &crypto.Sha3_256Hasher{}
+	hash := hasher.Hash(ub.contract)
+	xdrHash, err := xdr.HashFromSlice(hash)
+	if err != nil {
+		return nil, errors.New("unable to create contract hash")
+	}
 	action := xdr.Action{
-		Address:   ub.address,
-		ChannelID: ub.channel,
+		Address:   *ub.address,
+		ChannelID: *ub.channel,
 		Nonce:     ub.nonce,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONTRACT,
 				Contract: &xdr.Contract{
-					Contract: ub.contract,
-					Version:  ub.version,
+					ContractBytes: ub.contract,
+					ContractHash:  xdrHash,
+					Version:       ub.version,
 				},
 			},
 		},

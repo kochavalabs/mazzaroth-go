@@ -45,10 +45,10 @@ func TestUpdateConfigBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ucb := new(UpdateConfigBuilder)
-	tx, err := ucb.UpdateConfig(testAddress, testChannel, 0).
-		Owner(testAddress).
+	tx, err := ucb.UpdateConfig(&testAddress, &testChannel, 0).
+		Owner(&testAddress).
 		ChannelName("test").
-		Admins(testAddress).Sign(privateKey)
+		Admins(&testAddress).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}

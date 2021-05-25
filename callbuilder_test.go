@@ -41,7 +41,7 @@ func TestCallBuilder(t *testing.T) {
 		Action:    action,
 	}
 	cb := new(CallBuilder)
-	tx, err := cb.Call(testAddress, testChannel, 0).
+	tx, err := cb.Call(&testAddress, &testChannel, 0).
 		Function("test").
 		Parameters([]xdr.Parameter{Int32(1)}...).Sign(privateKey)
 	if err != nil {

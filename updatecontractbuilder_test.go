@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
@@ -15,6 +16,12 @@ func TestUpdateContractBuilder(t *testing.T) {
 	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(publicKey)
 	privateKey := ed25519.NewKeyFromSeed(seed)
+	hasher := &crypto.Sha3_256Hasher{}
+	hash := hasher.Hash([]byte("example"))
+	xdrHash, err := xdr.HashFromSlice(hash)
+	if err != nil {
+		t.Fatal(err)
+	}
 	action := xdr.Action{
 		Address:   testAddress,
 		ChannelID: testChannel,
@@ -24,8 +31,9 @@ func TestUpdateContractBuilder(t *testing.T) {
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONTRACT,
 				Contract: &xdr.Contract{
-					Contract: []byte("example"),
-					Version:  "1",
+					ContractBytes: []byte("example"),
+					ContractHash:  xdrHash,
+					Version:       "1",
 				},
 			},
 		},
@@ -44,7 +52,7 @@ func TestUpdateContractBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ub := new(UpdateContractBuilder)
-	tx, err := ub.UpdateContract(testAddress, testChannel, 0).
+	tx, err := ub.UpdateContract(&testAddress, &testChannel, 0).
 		Contract([]byte("example")).
 		Version("1").Sign(privateKey)
 	if err != nil {
