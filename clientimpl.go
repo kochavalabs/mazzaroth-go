@@ -14,7 +14,7 @@ import (
 
 var _ Client = &ClientImpl{}
 
-// client is the actual client implementation.
+// ClientImpl is the actual client implementation.
 type ClientImpl struct {
 	serverSelector ServerSelector
 	httpClient     *http.Client
@@ -56,32 +56,6 @@ func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Transa
 	}
 
 	response := xdr.TransactionSubmitResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// ReadOnly calls the endpoint: /readonly.
-func (c *ClientImpl) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
-	request := xdr.ReadonlyRequest{
-		Call: xdr.Call{
-			Function:   function,
-			Parameters: parameters,
-		},
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/readonly", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call readonly endpoint")
-	}
-
-	response := xdr.ReadonlyResponse{}
 	if err := response.UnmarshalBinary(binaryResp); err != nil {
 		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
 	}
@@ -137,7 +111,7 @@ func (c *ClientImpl) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResp
 // BlockLookup calls the endpoint: /block/lookup.
 func (c *ClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
 	request := xdr.BlockLookupRequest{
-		ID: blockID,
+		Identifier: blockID,
 	}
 
 	xdrRequest, err := request.MarshalBinary()
@@ -160,7 +134,7 @@ func (c *ClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupRespon
 // BlockHeaderLookup calls the endpoint: /block/header/lookup.
 func (c *ClientImpl) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	request := xdr.BlockHeaderLookupRequest{
-		ID: blockID,
+		Identifier: blockID,
 	}
 
 	xdrRequest, err := request.MarshalBinary()
@@ -197,29 +171,6 @@ func (c *ClientImpl) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookup
 	}
 
 	response := xdr.AccountInfoLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// NonceLookup calls the endpoint: /account/nonce/lookup.
-func (c *ClientImpl) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
-	request := xdr.AccountNonceLookupRequest{
-		Account: accountID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/account/nonce/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call account nonce lookup endpoint")
-	}
-
-	response := xdr.AccountNonceLookupResponse{}
 	if err := response.UnmarshalBinary(binaryResp); err != nil {
 		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
 	}

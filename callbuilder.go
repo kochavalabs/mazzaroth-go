@@ -11,7 +11,7 @@ type CallBuilder struct {
 	address, channel *xdr.ID
 	nonce            uint64
 	functionName     string
-	parameters       []xdr.Parameter
+	parameters       []xdr.Argument
 	signer           *xdr.Authority
 }
 
@@ -30,8 +30,8 @@ func (cb *CallBuilder) Function(name string) *CallBuilder {
 }
 
 //Parameters
-func (cb *CallBuilder) Parameters(parameters ...xdr.Parameter) *CallBuilder {
-	cb.parameters = parameters
+func (cb *CallBuilder) Arguments(arguments ...xdr.Argument) *CallBuilder {
+	cb.parameters = arguments
 	return cb
 }
 
@@ -50,7 +50,7 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 			Type: xdr.ActionCategoryTypeCALL,
 			Call: &xdr.Call{
 				Function:   cb.functionName,
-				Parameters: cb.parameters,
+				Arguments: cb.parameters,
 			},
 		},
 	}

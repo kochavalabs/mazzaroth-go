@@ -23,7 +23,7 @@ func TestCallBuilder(t *testing.T) {
 			Type: 1,
 			Call: &xdr.Call{
 				Function:   "test",
-				Parameters: []xdr.Parameter{"1"},
+				Arguments: []xdr.Argument{"1"},
 			},
 		},
 	}
@@ -43,7 +43,7 @@ func TestCallBuilder(t *testing.T) {
 	cb := new(CallBuilder)
 	tx, err := cb.Call(&testAddress, &testChannel, 0).
 		Function("test").
-		Parameters([]xdr.Parameter{Int32(1)}...).Sign(privateKey)
+		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}
