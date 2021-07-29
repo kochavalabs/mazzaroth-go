@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
@@ -198,6 +199,17 @@ func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xd
 		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
 	}
 	return &response, nil
+}
+
+// BlockHeightLookup retrieves the current block height
+func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
+	url := c.serverSelector.Pick() + "/block/height"
+	binaryResp, err := makeRequest(c.httpClient, url, nil)
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to call block height lookup endpoint")
+	}
+	blockHeight, err := strconv.ParseUint(string(binaryResp), 10, 64)
+	return blockHeight, errors.Wrap(err, "unable to convert block height response to uint64")
 }
 
 func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte, error) {

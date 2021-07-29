@@ -19,6 +19,7 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 		Address:   testAddress,
 		ChannelID: testChannel,
 		Nonce:     0,
+        BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
@@ -44,7 +45,7 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ub := new(UpdatePermissionBuilder)
-	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0).
+	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
 		Action(1).
 		Address(testAddress).Sign(privateKey)
 	if err != nil {

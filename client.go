@@ -12,4 +12,5 @@ type Client interface {
 	BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error)
 	AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
 	ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error)
+	BlockHeightLookup() (uint64, error)
 }

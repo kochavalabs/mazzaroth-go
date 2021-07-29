@@ -19,6 +19,7 @@ func TestCallBuilder(t *testing.T) {
 		Address:   testAddress,
 		ChannelID: testChannel,
 		Nonce:     0,
+        BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
 			Type: 1,
 			Call: &xdr.Call{
@@ -41,7 +42,7 @@ func TestCallBuilder(t *testing.T) {
 		Action:    action,
 	}
 	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0).
+	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
 		Function("test").
 		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
 	if err != nil {

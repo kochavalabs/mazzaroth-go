@@ -8,18 +8,20 @@ import (
 )
 
 type CallBuilder struct {
-	address, channel *xdr.ID
-	nonce            uint64
-	functionName     string
-	arguments       []xdr.Argument
-	signer           *xdr.Authority
+	address, channel      *xdr.ID
+	nonce                 uint64
+	blockExpirationNumber uint64
+	functionName          string
+	arguments             []xdr.Argument
+	signer                *xdr.Authority
 }
 
 //Call
-func (cb *CallBuilder) Call(address, channel *xdr.ID, nonce uint64) *CallBuilder {
+func (cb *CallBuilder) Call(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *CallBuilder {
 	cb.address = address
 	cb.channel = channel
 	cb.nonce = nonce
+	cb.blockExpirationNumber = blockExpirationNumber
 	return cb
 }
 
@@ -43,13 +45,14 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 	}
 
 	action := xdr.Action{
-		Address:   *cb.address,
-		ChannelID: *cb.channel,
-		Nonce:     cb.nonce,
+		Address:               *cb.address,
+		ChannelID:             *cb.channel,
+		Nonce:                 cb.nonce,
+		BlockExpirationNumber: cb.blockExpirationNumber,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeCALL,
 			Call: &xdr.Call{
-				Function:   cb.functionName,
+				Function:  cb.functionName,
 				Arguments: cb.arguments,
 			},
 		},

@@ -8,17 +8,19 @@ import (
 )
 
 type UpdatePermissionBuilder struct {
-	address, channel *xdr.ID
-	nonce            uint64
-	signer           *xdr.Authority
-	permissionAction xdr.PermissionAction
-	key              xdr.ID
+	address, channel      *xdr.ID
+	nonce                 uint64
+	blockExpirationNumber uint64
+	signer                *xdr.Authority
+	permissionAction      xdr.PermissionAction
+	key                   xdr.ID
 }
 
-func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel *xdr.ID, nonce uint64) *UpdatePermissionBuilder {
+func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
 	upb.address = address
 	upb.channel = channel
 	upb.nonce = nonce
+	upb.blockExpirationNumber = blockExpirationNumber
 	return upb
 }
 
@@ -38,6 +40,7 @@ func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transactio
 		Address:   *upb.address,
 		ChannelID: *upb.channel,
 		Nonce:     upb.nonce,
+        BlockExpirationNumber: upb.blockExpirationNumber,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{

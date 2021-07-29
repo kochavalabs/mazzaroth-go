@@ -9,17 +9,20 @@ import (
 )
 
 type UpdateContractBuilder struct {
-	address, channel *xdr.ID
-	nonce            uint64
-	signer           *xdr.Authority
-	contract         []byte
-	version          string
+	address, channel      *xdr.ID
+	nonce                 uint64
+	blockExpirationNumber uint64
+	signer                *xdr.Authority
+	contract              []byte
+	abi                   xdr.Abi
+	version               string
 }
 
-func (ub *UpdateContractBuilder) UpdateContract(address, channel *xdr.ID, nonce uint64) *UpdateContractBuilder {
+func (ub *UpdateContractBuilder) UpdateContract(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateContractBuilder {
 	ub.address = address
 	ub.channel = channel
 	ub.nonce = nonce
+	ub.blockExpirationNumber = blockExpirationNumber
 	return ub
 }
 
@@ -30,6 +33,11 @@ func (ub *UpdateContractBuilder) Contract(b []byte) *UpdateContractBuilder {
 
 func (ub *UpdateContractBuilder) Version(version string) *UpdateContractBuilder {
 	ub.version = version
+	return ub
+}
+
+func (ub *UpdateContractBuilder) Abi(abi xdr.Abi) *UpdateContractBuilder {
+	ub.abi = abi
 	return ub
 }
 
@@ -45,9 +53,10 @@ func (ub *UpdateContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, 
 		return nil, errors.New("unable to create contract hash")
 	}
 	action := xdr.Action{
-		Address:   *ub.address,
-		ChannelID: *ub.channel,
-		Nonce:     ub.nonce,
+		Address:               *ub.address,
+		ChannelID:             *ub.channel,
+		Nonce:                 ub.nonce,
+		BlockExpirationNumber: ub.blockExpirationNumber,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{

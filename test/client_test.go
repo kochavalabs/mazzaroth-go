@@ -60,9 +60,10 @@ func TestTransactionSubmit(t *testing.T) {
 	)
 
 	copy(address[:], pubKey)
-	nonce := uint64(2000)
+	nonce := uint64(1)
+    blockExpirationNumber := uint64(5)
 
-	tx, err := mazzaroth.Transaction().Call(&address, &channel, nonce).
+	tx, err := mazzaroth.Transaction().Call(&address, &channel, nonce, blockExpirationNumber).
 		Function("insert_foo").Arguments([]xdr.Argument{xdr.Argument(fooBytes)}...).Sign(privateKey)
 	require.NoError(t, err)
 	resp, err := client.TransactionSubmit(*tx)
