@@ -24,9 +24,8 @@ func TestUpdateConfigBuilder(t *testing.T) {
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONFIG,
 				ChannelConfig: &xdr.ChannelConfig{
-					Owner:       testAddress,
-					ChannelName: "test",
-					Admins:      []xdr.ID{testAddress},
+					Owner:  testAddress,
+					Admins: []xdr.ID{testAddress},
 				},
 			},
 		},
@@ -47,7 +46,6 @@ func TestUpdateConfigBuilder(t *testing.T) {
 	ucb := new(UpdateConfigBuilder)
 	tx, err := ucb.UpdateConfig(&testAddress, &testChannel, 0).
 		Owner(&testAddress).
-		ChannelName("test").
 		Admins(&testAddress).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)

@@ -12,7 +12,6 @@ type UpdateConfigBuilder struct {
 	nonce            uint64
 	signer           *xdr.Authority
 	ownerAddress     *xdr.ID
-	channelName      string
 	adminAddresses   []xdr.ID
 }
 
@@ -25,11 +24,6 @@ func (ucb *UpdateConfigBuilder) UpdateConfig(address, channel *xdr.ID, nonce uin
 
 func (ucb *UpdateConfigBuilder) Owner(address *xdr.ID) *UpdateConfigBuilder {
 	ucb.ownerAddress = address
-	return ucb
-}
-
-func (ucb *UpdateConfigBuilder) ChannelName(name string) *UpdateConfigBuilder {
-	ucb.channelName = name
 	return ucb
 }
 
@@ -51,9 +45,8 @@ func (ucb *UpdateConfigBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, e
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONFIG,
 				ChannelConfig: &xdr.ChannelConfig{
-					Owner:       *ucb.ownerAddress,
-					ChannelName: ucb.channelName,
-					Admins:      ucb.adminAddresses,
+					Owner:  *ucb.ownerAddress,
+					Admins: ucb.adminAddresses,
 				},
 			},
 		},
