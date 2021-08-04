@@ -37,9 +37,9 @@ func (txb *TransactionBuilder) Call(address, channel *xdr.ID, nonce, blockExpira
 	return callbuilder.Call(address, channel, nonce, blockExpirationNumber)
 }
 
-func (txb *TransactionBuilder) UpdateConfig(address, channel *xdr.ID, nonce uint64) *UpdateConfigBuilder {
+func (txb *TransactionBuilder) UpdateConfig(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateConfigBuilder {
 	updateConfigBuilder := new(UpdateConfigBuilder)
-	return updateConfigBuilder.UpdateConfig(address, channel, nonce)
+	return updateConfigBuilder.UpdateConfig(address, channel, nonce, blockExpirationNumber)
 }
 
 func (txb *TransactionBuilder) UpdateContract(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateContractBuilder {
