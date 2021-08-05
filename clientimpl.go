@@ -203,7 +203,7 @@ func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xd
 
 // BlockHeightLookup retrieves the current block height
 func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
-	url := c.serverSelector.Pick() + "/block/height"
+	url := c.serverSelector.Pick() + "/ledger/height"
 	binaryResp, err := makeRequest(c.httpClient, url, nil)
 	if err != nil {
 		return 0, errors.Wrap(err, "unable to call block height lookup endpoint")
