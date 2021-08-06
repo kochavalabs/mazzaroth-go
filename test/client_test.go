@@ -183,3 +183,14 @@ func TestChannelInfoLookup(t *testing.T) {
 	require.NotNil(t, resp.ChannelInfo.Contract.ContractBytes)
 	require.Equal(t, "0.1", resp.ChannelInfo.Contract.Version)
 }
+
+// TestBlockHeightLookup
+func TestBlockHeightLookup(t *testing.T) {
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
+	require.NoError(t, err)
+
+	height, err := client.BlockHeightLookup()
+	require.NoError(t, err)
+	require.Equal(t, uint64(0), height)
+}

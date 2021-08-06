@@ -221,7 +221,7 @@ func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
 	}
 
 	var blockHeight uint64
-	err = json.NewDecoder(resp.Body).Decode(blockHeight)
+	err = json.NewDecoder(resp.Body).Decode(&blockHeight)
 	if err != nil {
 		return 0, errors.Wrap(err, "unable to decode response")
 	}
