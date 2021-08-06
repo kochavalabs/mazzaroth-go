@@ -3,10 +3,10 @@ package mazzaroth
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
@@ -202,16 +202,35 @@ func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xd
 }
 
 // BlockHeightLookup retrieves the current block height
+// This endpoint uses JSON so does not need to use XDR or base64 encoding
 func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
 	url := c.serverSelector.Pick() + "/ledger/height"
-	binaryResp, err := makeRequest(c.httpClient, url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 	if err != nil {
-		return 0, errors.Wrap(err, "unable to call block height lookup endpoint")
+		return 0, errors.Wrap(err, "unable to create a new request")
 	}
-	blockHeight, err := strconv.ParseUint(string(binaryResp), 10, 64)
-	return blockHeight, errors.Wrap(err, "unable to convert block height response to uint64")
+
+	resp, err := c.httpClient.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to make http request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, errors.Wrap(err, "status code is not OK")
+	}
+
+	var blockHeight uint64
+	err = json.NewDecoder(resp.Body).Decode(blockHeight)
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to decode response")
+	}
+
+	return blockHeight, nil
 }
 
+// Requests are made by encoding the XDR Object bytes into base64 and sending in the request body
+// The response, if OK, is decoded from base64 and returned as XDR Bytes
 func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte, error) {
 	b64request := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(xdrRequest)
 
