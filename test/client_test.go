@@ -60,29 +60,16 @@ func TestTransactionSubmit(t *testing.T) {
 	)
 
 	copy(address[:], pubKey)
-	nonce := uint64(2000)
+	nonce := uint64(1)
+	blockExpirationNumber := uint64(5)
 
-	tx, err := mazzaroth.Transaction().Call(address, channel, nonce).
-		Function("insert_foo").Parameters([]xdr.Parameter{xdr.Parameter(fooBytes)}...).Sign(privateKey)
+	tx, err := mazzaroth.Transaction().Call(&address, &channel, nonce, blockExpirationNumber).
+		Function("insert_foo").Arguments([]xdr.Argument{xdr.Argument(fooBytes)}...).Sign(privateKey)
 	require.NoError(t, err)
 	resp, err := client.TransactionSubmit(*tx)
 	require.NoError(t, err)
 	require.Equal(t, xdr.TransactionStatusACCEPTED, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Transaction has been accepted and is being executed."), resp.StatusInfo)
-}
-
-// TestReadonly tests the happy path of the TestReadonly method.
-func TestReadonly(t *testing.T) {
-	options := []mazzaroth.Options{}
-	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
-	require.NoError(t, err)
-
-	function := "simple"
-	parameters := []xdr.Parameter{}
-	resp, err := client.ReadOnly(function, parameters...)
-	require.NoError(t, err)
-	require.Equal(t, xdr.ReadonlyStatusSUCCESS, resp.Status)
-	require.Equal(t, xdr.StatusInfo("Readonly request executed successfully."), resp.StatusInfo)
 }
 
 // TestTransactionLookup tests the happy path of the TestTransactionLookup method.
@@ -180,25 +167,6 @@ func TestAccountInfoLookup(t *testing.T) {
 	require.Equal(t, xdr.StatusInfo("Found info for account."), resp.StatusInfo)
 }
 
-// TestAccountNonceLookup tests the happy path of the TestAccountNonceLookup method.
-func TestAccountNonceLookup(t *testing.T) {
-	options := []mazzaroth.Options{}
-	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
-	require.NoError(t, err)
-
-	var id xdr.ID
-
-	ex, err := hex.DecodeString("dddd")
-	require.NoError(t, err)
-
-	copy(id[:], ex)
-
-	resp, err := client.NonceLookup(id)
-	require.NoError(t, err)
-	require.Equal(t, xdr.NonceLookupStatusFOUND, resp.Status)
-	require.Equal(t, xdr.StatusInfo("Found nonce for account."), resp.StatusInfo)
-}
-
 // TestChannelInfoLookup tests the happy path of the TestChannelInfoLookup method.
 func TestChannelInfoLookup(t *testing.T) {
 	options := []mazzaroth.Options{}
@@ -212,6 +180,17 @@ func TestChannelInfoLookup(t *testing.T) {
 	require.Equal(t, xdr.InfoLookupStatusFOUND, resp.Status)
 	require.Equal(t, xdr.StatusInfo("Found info for channel."), resp.StatusInfo)
 	require.Equal(t, xdr.ChannelInfoTypeCONTRACT, resp.ChannelInfo.Type)
-	require.NotNil(t, resp.ChannelInfo.Contract.Contract)
+	require.NotNil(t, resp.ChannelInfo.Contract.ContractBytes)
 	require.Equal(t, "0.1", resp.ChannelInfo.Contract.Version)
+}
+
+// TestBlockHeightLookup
+func TestBlockHeightLookup(t *testing.T) {
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
+	require.NoError(t, err)
+
+	height, err := client.BlockHeightLookup()
+	require.NoError(t, err)
+	require.Equal(t, uint64(0), height)
 }

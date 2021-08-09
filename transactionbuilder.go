@@ -29,25 +29,25 @@ func (txb *TransactionBuilder) Authority(address *xdr.ID) *TransactionBuilder {
 	return txb
 }
 
-func (txb *TransactionBuilder) Call(address, channel *xdr.ID, nonce uint64) *CallBuilder {
+func (txb *TransactionBuilder) Call(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *CallBuilder {
 	callbuilder := new(CallBuilder)
 	if txb.authority != nil {
 		callbuilder.signer = txb.authority
 	}
-	return callbuilder.Call(address, channel, nonce)
+	return callbuilder.Call(address, channel, nonce, blockExpirationNumber)
 }
 
-func (txb *TransactionBuilder) UpdateConfig(address, channel *xdr.ID, nonce uint64) *UpdateConfigBuilder {
+func (txb *TransactionBuilder) UpdateConfig(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateConfigBuilder {
 	updateConfigBuilder := new(UpdateConfigBuilder)
-	return updateConfigBuilder.UpdateConfig(address, channel, nonce)
+	return updateConfigBuilder.UpdateConfig(address, channel, nonce, blockExpirationNumber)
 }
 
-func (txb *TransactionBuilder) UpdateContract(address, channel *xdr.ID, nonce uint64) *UpdateContractBuilder {
+func (txb *TransactionBuilder) UpdateContract(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateContractBuilder {
 	updateContractBuilder := new(UpdateContractBuilder)
-	return updateContractBuilder.UpdateContract(address, channel, nonce)
+	return updateContractBuilder.UpdateContract(address, channel, nonce, blockExpirationNumber)
 }
 
-func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce uint64) *UpdatePermissionBuilder {
+func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
 	updatePermissionBuilder := new(UpdatePermissionBuilder)
-	return updatePermissionBuilder.UpdatePermission(address, channel, nonce)
+	return updatePermissionBuilder.UpdatePermission(address, channel, nonce, blockExpirationNumber)
 }

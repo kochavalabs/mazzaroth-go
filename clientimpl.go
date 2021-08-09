@@ -3,6 +3,7 @@ package mazzaroth
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 var _ Client = &ClientImpl{}
 
-// client is the actual client implementation.
+// ClientImpl is the actual client implementation.
 type ClientImpl struct {
 	serverSelector ServerSelector
 	httpClient     *http.Client
@@ -56,32 +57,6 @@ func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Transa
 	}
 
 	response := xdr.TransactionSubmitResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// ReadOnly calls the endpoint: /readonly.
-func (c *ClientImpl) ReadOnly(function string, parameters ...xdr.Parameter) (*xdr.ReadonlyResponse, error) {
-	request := xdr.ReadonlyRequest{
-		Call: xdr.Call{
-			Function:   function,
-			Parameters: parameters,
-		},
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/readonly", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call readonly endpoint")
-	}
-
-	response := xdr.ReadonlyResponse{}
 	if err := response.UnmarshalBinary(binaryResp); err != nil {
 		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
 	}
@@ -137,7 +112,7 @@ func (c *ClientImpl) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResp
 // BlockLookup calls the endpoint: /block/lookup.
 func (c *ClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
 	request := xdr.BlockLookupRequest{
-		ID: blockID,
+		Identifier: blockID,
 	}
 
 	xdrRequest, err := request.MarshalBinary()
@@ -160,7 +135,7 @@ func (c *ClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupRespon
 // BlockHeaderLookup calls the endpoint: /block/header/lookup.
 func (c *ClientImpl) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
 	request := xdr.BlockHeaderLookupRequest{
-		ID: blockID,
+		Identifier: blockID,
 	}
 
 	xdrRequest, err := request.MarshalBinary()
@@ -203,29 +178,6 @@ func (c *ClientImpl) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookup
 	return &response, nil
 }
 
-// NonceLookup calls the endpoint: /account/nonce/lookup.
-func (c *ClientImpl) NonceLookup(accountID xdr.ID) (*xdr.AccountNonceLookupResponse, error) {
-	request := xdr.AccountNonceLookupRequest{
-		Account: accountID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/account/nonce/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call account nonce lookup endpoint")
-	}
-
-	response := xdr.AccountNonceLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
 // ChannelInfoLookup calls the endpoint: /channel/info/lookup.
 func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
 	request := xdr.ChannelInfoLookupRequest{
@@ -249,6 +201,36 @@ func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xd
 	return &response, nil
 }
 
+// BlockHeightLookup retrieves the current block height
+// This endpoint uses JSON so does not need to use XDR or base64 encoding
+func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
+	url := c.serverSelector.Pick() + "/ledger/height"
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to create a new request")
+	}
+
+	resp, err := c.httpClient.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to make http request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, errors.Wrap(err, "status code is not OK")
+	}
+
+	var blockHeight uint64
+	err = json.NewDecoder(resp.Body).Decode(&blockHeight)
+	if err != nil {
+		return 0, errors.Wrap(err, "unable to decode response")
+	}
+
+	return blockHeight, nil
+}
+
+// Requests are made by encoding the XDR Object bytes into base64 and sending in the request body
+// The response, if OK, is decoded from base64 and returned as XDR Bytes
 func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte, error) {
 	b64request := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(xdrRequest)
 

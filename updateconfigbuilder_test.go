@@ -16,17 +16,17 @@ func TestUpdateConfigBuilder(t *testing.T) {
 	seed, _ := hex.DecodeString(publicKey)
 	privateKey := ed25519.NewKeyFromSeed(seed)
 	action := xdr.Action{
-		Address:   testAddress,
-		ChannelID: testChannel,
-		Nonce:     0,
+		Address:               testAddress,
+		ChannelID:             testChannel,
+		Nonce:                 0,
+		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeCONFIG,
 				ChannelConfig: &xdr.ChannelConfig{
-					Owner:       testAddress,
-					ChannelName: "test",
-					Admins:      []xdr.ID{testAddress},
+					Owner:  testAddress,
+					Admins: []xdr.ID{testAddress},
 				},
 			},
 		},
@@ -45,9 +45,8 @@ func TestUpdateConfigBuilder(t *testing.T) {
 		Action:    action,
 	}
 	ucb := new(UpdateConfigBuilder)
-	tx, err := ucb.UpdateConfig(&testAddress, &testChannel, 0).
+	tx, err := ucb.UpdateConfig(&testAddress, &testChannel, 0, 1).
 		Owner(&testAddress).
-		ChannelName("test").
 		Admins(&testAddress).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
