@@ -13,4 +13,5 @@ type Client interface {
 	AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error)
 	ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error)
 	BlockHeightLookup() (uint64, error)
+	AbiLookup(channelID xdr.ID) (*xdr.Abi, error)
 }

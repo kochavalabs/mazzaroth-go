@@ -1,8 +1,10 @@
 package mazzaroth
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
@@ -217,7 +219,7 @@ func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, errors.Wrap(err, "status code is not OK")
+		return 0, errors.New("status code is not OK")
 	}
 
 	var blockHeight uint64
@@ -227,6 +229,53 @@ func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
 	}
 
 	return blockHeight, nil
+}
+
+type abiRequest struct {
+	// ChannelID as hex string
+	ChannelID string
+}
+
+// AbiLookup retrieves the ABI for a given channel ID
+// This endpoint uses JSON so does not need to use XDR or base64 encoding
+func (c *ClientImpl) AbiLookup(channelID xdr.ID) (*xdr.Abi, error) {
+	channelIDHex := make([]byte, len(channelID[:])*2)
+	hex.Encode(channelIDHex, channelID[:])
+
+	request := abiRequest{
+		ChannelID: string(channelIDHex),
+	}
+
+	body, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create a new request")
+	}
+
+	url := c.serverSelector.Pick() + "/abi"
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create a new request")
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make http request")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("status code is not OK")
+	}
+
+	response := &xdr.Abi{}
+	err = json.NewDecoder(resp.Body).Decode(response)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode response")
+	}
+
+	return response, nil
 }
 
 // Requests are made by encoding the XDR Object bytes into base64 and sending in the request body
@@ -251,7 +300,7 @@ func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Wrap(err, "status code is not OK")
+		return nil, errors.New("status code is not OK")
 	}
 
 	b64Resp, err := io.ReadAll(resp.Body)

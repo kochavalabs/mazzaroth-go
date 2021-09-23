@@ -194,3 +194,15 @@ func TestBlockHeightLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, uint64(0), height)
 }
+
+// TestABILookup
+func TestABILookup(t *testing.T) {
+	options := []mazzaroth.Options{}
+	client, err := mazzaroth.NewMazzarothClient([]string{server}, options...)
+	require.NoError(t, err)
+
+	testAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
+	abi, err := client.AbiLookup(testAddress)
+	require.NoError(t, err)
+	require.Equal(t, &xdr.Abi{Functions: []xdr.FunctionSignature{xdr.FunctionSignature{FunctionType: "function", Name: "setup", Inputs: []xdr.Parameter(nil), Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "bool", Codec: "bytes"}}}, xdr.FunctionSignature{FunctionType: "readonly", Name: "simple", Inputs: []xdr.Parameter(nil), Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "string", Codec: "bytes"}}}, xdr.FunctionSignature{FunctionType: "function", Name: "args", Inputs: []xdr.Parameter{xdr.Parameter{Name: "one", ParameterType: "string", Codec: "bytes"}, xdr.Parameter{Name: "two", ParameterType: "string", Codec: "bytes"}, xdr.Parameter{Name: "three", ParameterType: "string", Codec: "bytes"}}, Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "uint32", Codec: "bytes"}}}, xdr.FunctionSignature{FunctionType: "function", Name: "complex", Inputs: []xdr.Parameter{xdr.Parameter{Name: "foo_arg", ParameterType: "Foo", Codec: "bytes"}, xdr.Parameter{Name: "bar_arg", ParameterType: "Bar", Codec: "bytes"}}, Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "string", Codec: "bytes"}}}, xdr.FunctionSignature{FunctionType: "function", Name: "insert_foo", Inputs: []xdr.Parameter{xdr.Parameter{Name: "foo", ParameterType: "Foo", Codec: "bytes"}}, Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "int32[]", Codec: "bytes"}}}, xdr.FunctionSignature{FunctionType: "function", Name: "query_foo", Inputs: []xdr.Parameter{xdr.Parameter{Name: "where_clause", ParameterType: "string", Codec: "bytes"}}, Outputs: []xdr.Parameter{xdr.Parameter{Name: "returnValue0", ParameterType: "Foo[]", Codec: "bytes"}}}}}, abi)
+}
