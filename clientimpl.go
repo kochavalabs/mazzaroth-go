@@ -213,10 +213,10 @@ func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
 	}
 
 	resp, err := c.httpClient.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return 0, errors.Wrap(err, "unable to make http request")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return 0, errors.New("status code is not OK")
@@ -260,10 +260,10 @@ func (c *ClientImpl) AbiLookup(channelID xdr.ID) (*xdr.Abi, error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make http request")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("status code is not OK")

@@ -1,3 +1,5 @@
+.PHONY: all $(MAKECMDGOALS)
+
 test:
 	go test ./... -count=1
 
