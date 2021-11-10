@@ -35,7 +35,7 @@ func TestUpdateContractBuilder(t *testing.T) {
 					ContractBytes: []byte("example"),
 					ContractHash:  xdrHash,
 					Version:       "1",
-					Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: "readonly", Name: "Test"}}},
+					Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
 				},
 			},
 		},
@@ -56,7 +56,7 @@ func TestUpdateContractBuilder(t *testing.T) {
 	ub := new(UpdateContractBuilder)
 	tx, err := ub.UpdateContract(&testAddress, &testChannel, 0, 1).
 		Contract([]byte("example")).
-		Version("1").Abi(xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: "readonly", Name: "Test"}}}).Sign(privateKey)
+		Version("1").Abi(xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}
