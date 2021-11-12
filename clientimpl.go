@@ -119,29 +119,29 @@ func (c *ClientImpl) ReceiptLookup(channelID, transactionID string) (*xdr.Respon
 	return response, nil
 }
 
-// ReceiptLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
-func (c *ClientImpl) ReceiptLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/receipts?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+// // ReceiptListFromBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+// func (c *ClientImpl) ReceiptListFromBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
+// 	url := fmt.Sprintf("%s/%s/channels/%s/receipts?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to receipts by height endpoint")
-	}
+// 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "unable to make a request to receipts by height endpoint")
+// 	}
 
-	return response, nil
-}
+// 	return response, nil
+// }
 
-// ReceiptLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
-func (c *ClientImpl) ReceiptLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/receipts?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
+// // ReceiptListFromBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
+// func (c *ClientImpl) ReceiptListFromBlockID(channelID string, blockID string) (*xdr.Response, error) {
+// 	url := fmt.Sprintf("%s/%s/channels/%s/receipts?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
 
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to receipts by blockid lookup endpoint")
-	}
+// 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+// 	if err != nil {
+// 		return nil, errors.Wrap(err, "unable to make a request to receipts by blockid lookup endpoint")
+// 	}
 
-	return response, nil
-}
+// 	return response, nil
+// }
 
 // BlockLookup calls the endpoint: /v1/channels/{channel_id}/blocks/{id}.
 func (c *ClientImpl) BlockLookup(channelID, transactionID string) (*xdr.Response, error) {
@@ -155,8 +155,8 @@ func (c *ClientImpl) BlockLookup(channelID, transactionID string) (*xdr.Response
 	return response, nil
 }
 
-// BlockLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
-func (c *ClientImpl) BlockLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
+// BlockListFromBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+func (c *ClientImpl) BlockListFromBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
@@ -167,8 +167,8 @@ func (c *ClientImpl) BlockLookupByBlockHeight(channelID string, blockHeight int)
 	return response, nil
 }
 
-// BlockLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
-func (c *ClientImpl) BlockLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
+// BlockListFromBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
+func (c *ClientImpl) BlockListFromBlockID(channelID string, blockID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
@@ -191,8 +191,8 @@ func (c *ClientImpl) BlockHeaderLookup(channelID, transactionID string) (*xdr.Re
 	return response, nil
 }
 
-// BlockHeaderLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
-func (c *ClientImpl) BlockHeaderLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
+// BlockHeaderListFromBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+func (c *ClientImpl) BlockHeaderListFromBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
@@ -203,8 +203,8 @@ func (c *ClientImpl) BlockHeaderLookupByBlockHeight(channelID string, blockHeigh
 	return response, nil
 }
 
-// BlockHeaderLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
-func (c *ClientImpl) BlockHeaderLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
+// BlockHeaderListFromBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
+func (c *ClientImpl) BlockHeaderListFromBlockID(channelID string, blockID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)

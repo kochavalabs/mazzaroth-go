@@ -193,7 +193,7 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
 
 	// Block lookup by height.
-	blockListResponse, err := client.BlockLookupByBlockHeight(channelStr, 2)
+	blockListResponse, err := client.BlockListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
@@ -201,7 +201,7 @@ func TestTransactionSubmit(t *testing.T) {
 	blockID := hex.EncodeToString((*blockListResponse.Blocks)[1].Header.PreviousHeader[:])
 
 	// Block lookup by id.
-	blockListResponse, err = client.BlockLookupByBlockID(channelStr, blockID)
+	blockListResponse, err = client.BlockListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
@@ -217,27 +217,27 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, receiptLookupResponse.Type, xdr.ResponseTypeRECEIPT)
 
 	// // Receipt lookup by height.
-	// receiptListLookupResponse, err := client.ReceiptLookupByBlockHeight(channelStr, 2)
+	// receiptListLookupResponse, err := client.ReceiptListFromBlockHeight(channelStr, 2)
 	// require.NoError(t, err)
 	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
 	// // Receipt lookup by block id.
-	// receiptListLookupResponse, err := client.ReceiptLookupByBlockID(channelStr, blockID)
+	// receiptListLookupResponse, err := client.ReceiptListFromBlockID(channelStr, blockID)
 	// require.NoError(t, err)
 	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
-	// // Block header lookup.
-	// blockHeaderLookupResponse, err := client.BlockHeaderLookup(channelStr, transactionStr)
-	// require.NoError(t, err)
-	// require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
+	// Block header lookup.
+	blockHeaderLookupResponse, err := client.BlockHeaderLookup(channelStr, blockID)
+	require.NoError(t, err)
+	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
 
 	// Block header lookup by block height.
-	blockHeaderLookupResponse, err := client.BlockHeaderLookupByBlockHeight(channelStr, 1)
+	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 1)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 
 	// Block header lookup by block id.
-	blockHeaderLookupResponse, err = client.BlockHeaderLookupByBlockID(channelStr, blockID)
+	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 }
