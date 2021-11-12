@@ -121,7 +121,7 @@ func (c *ClientImpl) ReceiptLookup(channelID, transactionID string) (*xdr.Respon
 
 // ReceiptLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
 func (c *ClientImpl) ReceiptLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/receipts?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+	url := fmt.Sprintf("%s/%s/channels/%s/receipts?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
@@ -157,7 +157,7 @@ func (c *ClientImpl) BlockLookup(channelID, transactionID string) (*xdr.Response
 
 // BlockLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
 func (c *ClientImpl) BlockLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blocks?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
@@ -240,6 +240,9 @@ func (c *ClientImpl) ChannelHeight(channelID string) (*xdr.Response, error) {
 }
 
 func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*xdr.Response, error) {
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
+	fmt.Println(url)
+
 	req, err := http.NewRequestWithContext(context.Background(), method, url, body)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to create a new request")
@@ -276,7 +279,6 @@ func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*
 		return nil, errors.Wrap(err, "could not read the body")
 	}
 
-	fmt.Println("--------------------------------------------------------------------------------------------------------")
 	fmt.Println(string(responseBody))
 	fmt.Println("--------------------------------------------------------------------------------------------------------")
 

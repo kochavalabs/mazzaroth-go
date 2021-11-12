@@ -152,31 +152,40 @@ func uploadContract(blockHeight uint64) {
 }
 
 func TestTransactionSubmit(t *testing.T) {
-	nonce := uint64(mathrand.Intn(100))
 	blockHeightResp, err := client.ChannelHeight(hex.EncodeToString(channel[:]))
 	require.NoError(t, err)
-	blockExpirationNumber := blockHeightResp.Height.Height + 1
+	blockExpirationNumber := blockHeightResp.Height.Height
 
 	channelResponse, err := client.ChannelLookup(channelStr)
 	require.NoError(t, err)
 	require.Equal(t, channelResponse.Type, xdr.ResponseTypeCHANNEL)
 
-	// Submit.
+	var transaction *xdr.Transaction
+	var transactionStr string
+
 	builder := CallBuilder{}
-	transaction, err := builder.
-		Call(&address, &channel, nonce, blockExpirationNumber).
-		Function("args").
-		Arguments([]xdr.Argument{String("a"), String("b"), String("c")}...).
-		Sign(privateKey)
-	require.NoError(t, err)
 
-	txResponse, err := client.TransactionSubmit(*transaction)
-	require.NoError(t, err)
-	require.Equal(t, txResponse.Type, xdr.ResponseTypeTRANSACTIONID)
+	for i := 0; i < 5; i++ {
+		// Submit.
+		nonce := uint64(mathrand.Intn(100))
 
-	transactionStr := hex.EncodeToString((*txResponse.TransactionID)[:])
+		blockExpirationNumber++
 
-	waitForReceipt(channelStr, transactionStr)
+		transaction, err = builder.
+			Call(&address, &channel, nonce, blockExpirationNumber).
+			Function("args").
+			Arguments([]xdr.Argument{String("a"), String("b"), String("c")}...).
+			Sign(privateKey)
+		require.NoError(t, err)
+
+		txResponse, err := client.TransactionSubmit(*transaction)
+		require.NoError(t, err)
+		require.Equal(t, txResponse.Type, xdr.ResponseTypeTRANSACTIONID)
+
+		transactionStr = hex.EncodeToString((*txResponse.TransactionID)[:])
+
+		waitForReceipt(channelStr, transactionStr)
+	}
 
 	// Transaction lookup.
 	txLookupResponse, err := client.TransactionLookup(channelStr, transactionStr)
@@ -184,12 +193,12 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
 
 	// Block lookup by height.
-	blockListResponse, err := client.BlockLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
+	blockListResponse, err := client.BlockLookupByBlockHeight(channelStr, 2)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
-	blockID := hex.EncodeToString((*blockListResponse.Blocks)[0].Header.StateRoot[:])
+	blockID := hex.EncodeToString((*blockListResponse.Blocks)[1].Header.PreviousHeader[:])
 
 	// Block lookup by id.
 	blockListResponse, err = client.BlockLookupByBlockID(channelStr, blockID)
@@ -197,10 +206,10 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
-	// // Block lookup.
-	// blockResponse, err := client.BlockLookup(channelStr, blockID)
-	// require.NoError(t, err)
-	// require.Equal(t, blockResponse.Type, xdr.ResponseTypeBLOCK)
+	// Block lookup.
+	blockResponse, err := client.BlockLookup(channelStr, blockID)
+	require.NoError(t, err)
+	require.Equal(t, blockResponse.Type, xdr.ResponseTypeBLOCK)
 
 	// Receipt lookup.
 	receiptLookupResponse, err := client.ReceiptLookup(channelStr, transactionStr)
@@ -208,12 +217,12 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, receiptLookupResponse.Type, xdr.ResponseTypeRECEIPT)
 
 	// // Receipt lookup by height.
-	// receiptListLookupResponse, err := client.ReceiptLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
+	// receiptListLookupResponse, err := client.ReceiptLookupByBlockHeight(channelStr, 2)
 	// require.NoError(t, err)
 	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
 	// // Receipt lookup by block id.
-	// receiptListLookupResponse, err = client.ReceiptLookupByBlockID(channelStr, blockID)
+	// receiptListLookupResponse, err := client.ReceiptLookupByBlockID(channelStr, blockID)
 	// require.NoError(t, err)
 	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
@@ -223,7 +232,7 @@ func TestTransactionSubmit(t *testing.T) {
 	// require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
 
 	// Block header lookup by block height.
-	blockHeaderLookupResponse, err := client.BlockHeaderLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
+	blockHeaderLookupResponse, err := client.BlockHeaderLookupByBlockHeight(channelStr, 1)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 
