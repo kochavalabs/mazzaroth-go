@@ -19,7 +19,9 @@ import (
 
 var servers = []string{"http://localhost:8081"}
 
-var channelStr string
+var channelStr string = "0000000000000000000000000000000000000000000000000000000000000000"
+var seedStr string = "0000000000000000000000000000000000000000000000000000000000000000"
+
 var channel xdr.ID
 var address xdr.ID
 var privateKey ed25519.PrivateKey
@@ -28,14 +30,12 @@ var client Client
 func init() {
 	var err error
 
-	channelStr = "0000000000000000000000000000000000000000000000000000000000000000"
 	channel, err = xdr.IDFromHexString(channelStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
-	seed, err := hex.DecodeString(publicKey)
+	seed, err := hex.DecodeString(seedStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,10 +160,7 @@ func TestTransactionSubmit(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, channelResponse.Type, xdr.ResponseTypeCHANNEL)
 
-	var transaction *xdr.Transaction
 	var transactionStr string
-
-	builder := CallBuilder{}
 
 	for i := 0; i < 5; i++ {
 		// Submit.
@@ -171,14 +168,7 @@ func TestTransactionSubmit(t *testing.T) {
 
 		blockExpirationNumber++
 
-		transaction, err = builder.
-			Call(&address, &channel, nonce, blockExpirationNumber).
-			Function("args").
-			Arguments([]xdr.Argument{String("a"), String("b"), String("c")}...).
-			Sign(privateKey)
-		require.NoError(t, err)
-
-		txResponse, err := client.TransactionSubmit(*transaction)
+		txResponse, err := client.TransactionSubmitCall(channelStr, seedStr, "args", []string{"a", "b", "c"}, nonce, blockExpirationNumber)
 		require.NoError(t, err)
 		require.Equal(t, txResponse.Type, xdr.ResponseTypeTRANSACTIONID)
 
