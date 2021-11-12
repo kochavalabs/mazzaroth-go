@@ -232,7 +232,7 @@ func TestTransactionSubmit(t *testing.T) {
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
 
 	// Block header lookup by block height.
-	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 1)
+	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 
