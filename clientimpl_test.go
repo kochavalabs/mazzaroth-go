@@ -157,6 +157,10 @@ func TestTransactionSubmit(t *testing.T) {
 	require.NoError(t, err)
 	blockExpirationNumber := blockHeightResp.Height.Height + 1
 
+	channelResponse, err := client.ChannelLookup(channelStr)
+	require.NoError(t, err)
+	require.Equal(t, channelResponse.Type, xdr.ResponseTypeCHANNEL)
+
 	// Submit.
 	builder := CallBuilder{}
 	transaction, err := builder.
@@ -179,11 +183,6 @@ func TestTransactionSubmit(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
 
-	// Block lookup.
-	receiptLookupResponse, err := client.ReceiptLookup(channelStr, transactionStr)
-	require.NoError(t, err)
-	require.Equal(t, receiptLookupResponse.Type, xdr.ResponseTypeRECEIPT)
-
 	// Block lookup by height.
 	blockListResponse, err := client.BlockLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
 	require.NoError(t, err)
@@ -192,156 +191,44 @@ func TestTransactionSubmit(t *testing.T) {
 
 	blockID := hex.EncodeToString((*blockListResponse.Blocks)[0].Header.StateRoot[:])
 
-	// Receipt lookup.
-	blockResponse, err := client.BlockLookup(channelStr, blockID)
-	require.NoError(t, err)
-	require.Equal(t, blockResponse.Type, xdr.ResponseTypeBLOCK)
-
 	// Block lookup by id.
 	blockListResponse, err = client.BlockLookupByBlockID(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
-	// // Receipt lookup by block height.
-	// receiptLookupResponse, err = client.ReceiptLookupByBlockHeight(channelStr, 1)
+	// // Block lookup.
+	// blockResponse, err := client.BlockLookup(channelStr, blockID)
 	// require.NoError(t, err)
-	// require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
+	// require.Equal(t, blockResponse.Type, xdr.ResponseTypeBLOCK)
+
+	// Receipt lookup.
+	receiptLookupResponse, err := client.ReceiptLookup(channelStr, transactionStr)
+	require.NoError(t, err)
+	require.Equal(t, receiptLookupResponse.Type, xdr.ResponseTypeRECEIPT)
+
+	// // Receipt lookup by height.
+	// receiptListLookupResponse, err := client.ReceiptLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
+	// require.NoError(t, err)
+	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
 	// // Receipt lookup by block id.
-	// receiptLookupResponse, err = client.ReceiptLookupByBlockID(channelStr, blockID)
+	// receiptListLookupResponse, err = client.ReceiptLookupByBlockID(channelStr, blockID)
 	// require.NoError(t, err)
-	// require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
+	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
 
+	// // Block header lookup.
+	// blockHeaderLookupResponse, err := client.BlockHeaderLookup(channelStr, transactionStr)
+	// require.NoError(t, err)
+	// require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
+
+	// Block header lookup by block height.
+	blockHeaderLookupResponse, err := client.BlockHeaderLookupByBlockHeight(channelStr, int(blockExpirationNumber-1))
+	require.NoError(t, err)
+	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
+
+	// Block header lookup by block id.
+	blockHeaderLookupResponse, err = client.BlockHeaderLookupByBlockID(channelStr, blockID)
+	require.NoError(t, err)
+	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 }
-
-// func TestReceiptLookup(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000000"
-// 	transactionID := "00000000000000000000000000000000"
-
-// 	response, err := client.ReceiptLookup(channelID, transactionID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeRECEIPT)
-// }
-
-// func TestReceiptLookupByBlockHeight(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockHeight := 10
-
-// 	response, err := client.ReceiptLookupByBlockHeight(channelID, blockHeight)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeRECEIPTLIST)
-// }
-
-// func TestReceiptLookupByBlockID(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockID := "00000000000000000000000000000002"
-
-// 	response, err := client.ReceiptLookupByBlockID(channelID, blockID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeRECEIPTLIST)
-// }
-
-// func TestBlockLookup(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000000"
-// 	transactionID := "00000000000000000000000000000000"
-
-// 	response, err := client.BlockLookup(channelID, transactionID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCK)
-// }
-
-// func TestBlockLookupByBlockHeight(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockHeight := 10
-
-// 	response, err := client.BlockLookupByBlockHeight(channelID, blockHeight)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCKLIST)
-// }
-
-// func TestBlockLookupByBlockID(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockID := "00000000000000000000000000000002"
-
-// 	response, err := client.BlockLookupByBlockID(channelID, blockID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCKLIST)
-// }
-
-// func TestBlockHeaderLookup(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000000"
-// 	transactionID := "00000000000000000000000000000000"
-
-// 	response, err := client.BlockHeaderLookup(channelID, transactionID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCKHEADER)
-// }
-
-// func TestBlockHeaderLookupByBlockHeight(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockHeight := 10
-
-// 	response, err := client.BlockHeaderLookupByBlockHeight(channelID, blockHeight)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCKHEADERLIST)
-// }
-
-// func TestBlockHeaderLookupByBlockID(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000001"
-// 	blockID := "00000000000000000000000000000002"
-
-// 	response, err := client.BlockHeaderLookupByBlockID(channelID, blockID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeBLOCKHEADERLIST)
-// }
-
-// func TestChannelLookup(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000000"
-
-// 	response, err := client.ChannelLookup(channelID)
-// 	require.NoError(t, err)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeCHANNEL)
-// }
-
-// func TestChannelHeight(t *testing.T) {
-// 	client, err := NewMazzarothClient(servers)
-// 	require.NoError(t, err)
-
-// 	channelID := "00000000000000000000000000000000"
-
-// 	response, err := client.ChannelHeight(channelID)
-// 	require.NoError(t, err)
-// 	t.Log(response)
-// 	require.Equal(t, response.Type, xdr.ResponseTypeHEIGHT)
-// }
