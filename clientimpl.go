@@ -3,6 +3,7 @@ package mazzaroth
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -55,7 +56,12 @@ func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Respon
 		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
 
-	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, transaction.Action.ChannelID)
+	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
 
 	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
 	if err != nil {
@@ -257,7 +263,12 @@ func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*
 	case http.StatusInternalServerError:
 		return nil, ErrInternalServer
 	default:
-		return nil, fmt.Errorf("http status %d", resp.StatusCode)
+		responseBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not read the body")
+		}
+
+		return nil, fmt.Errorf("http status %d - %s", resp.StatusCode, string(responseBody))
 	}
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -265,7 +276,9 @@ func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*
 		return nil, errors.Wrap(err, "could not read the body")
 	}
 
-	fmt.Print(string(responseBody))
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
+	fmt.Println(string(responseBody))
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
 
 	responseXDR := xdr.Response{}
 	err = responseXDR.UnmarshalJSON(responseBody)

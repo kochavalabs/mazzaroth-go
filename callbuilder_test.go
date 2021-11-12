@@ -16,14 +16,14 @@ func TestCallBuilder(t *testing.T) {
 	seed, _ := hex.DecodeString(publicKey)
 	privateKey := ed25519.NewKeyFromSeed(seed)
 	action := xdr.Action{
-		Address:   testAddress,
-		ChannelID: testChannel,
-		Nonce:     0,
-        BlockExpirationNumber: 1,
+		Address:               testAddress,
+		ChannelID:             testChannel,
+		Nonce:                 0,
+		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
 			Type: 1,
 			Call: &xdr.Call{
-				Function:   "test",
+				Function:  "test",
 				Arguments: []xdr.Argument{"1"},
 			},
 		},
