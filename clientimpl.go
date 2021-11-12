@@ -76,18 +76,18 @@ func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Respon
 func (c *ClientImpl) TransactionSubmitCall(channelID string, seed string, functionName string, parameters []string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
 	channel, err := xdr.IDFromHexString(channelID)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "unable to extract channel id")
 	}
 
 	seedBin, err := hex.DecodeString(seed)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "unable to decode seed")
 	}
 
 	privateKey := ed25519.NewKeyFromSeed(seedBin)
 	address, err := xdr.IDFromPublicKey(privateKey.Public())
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "unable to create private key")
 	}
 
 	var arguments []xdr.Argument
@@ -102,6 +102,58 @@ func (c *ClientImpl) TransactionSubmitCall(channelID string, seed string, functi
 		Function(functionName).
 		Arguments(arguments...).
 		Sign(privateKey)
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionSubmitContract calls the endpoint: /v1/channels/{channel_id}/transactions for Contract update transactions.
+func (c *ClientImpl) TransactionSubmitContract(channelID string, seed string, contractBytes []byte, abiDef []byte, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	// Load the ABI.
+	var abi xdr.Abi
+	err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode abi")
+	}
+
+	// Create the transaction.
+	ucb := UpdateContractBuilder{}
+
+	transaction, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockExpirationNumber).
+		Version(version).
+		Abi(abi).
+		Contract(contractBytes).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to build contract")
+	}
 
 	b, err := json.Marshal(transaction)
 	if err != nil {

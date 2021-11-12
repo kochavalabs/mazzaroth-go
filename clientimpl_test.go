@@ -1,10 +1,8 @@
 package mazzaroth
 
 import (
-	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
-	"encoding/json"
 	"log"
 	mathrand "math/rand"
 	"os"
@@ -114,12 +112,12 @@ func uploadContract(blockHeight uint64) {
 		log.Fatal(err)
 	}
 
-	// Load the ABI.
-	var abi xdr.Abi
-	err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// // Load the ABI.
+	// var abi xdr.Abi
+	// err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Contract.
 	contract, err := os.ReadFile(dataDir + "/contract.wasm")
@@ -127,22 +125,28 @@ func uploadContract(blockHeight uint64) {
 		log.Fatal(err)
 	}
 
-	nonce := mathrand.Intn(100000000000000)
+	nonce := uint64(mathrand.Intn(100000000000000))
 
-	// Create the transaction.
-	ucb := UpdateContractBuilder{}
+	// // Create the transaction.
+	// ucb := UpdateContractBuilder{}
 
-	txTransacion, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockHeight).
-		Version(version).
-		Abi(abi).
-		Contract(contract).
-		Sign(privateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// txTransacion, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockHeight).
+	// 	Version(version).
+	// 	Abi(abi).
+	// 	Contract(contract).
+	// 	Sign(privateKey)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// // Execute the transaction.
+	// txResponse, err := client.TransactionSubmit(*txTransacion)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// Execute the transaction.
-	txResponse, err := client.TransactionSubmit(*txTransacion)
+	txResponse, err := client.TransactionSubmitContract(channelStr, seedStr, contract, abiDef, nonce, blockHeight)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -151,7 +155,7 @@ func uploadContract(blockHeight uint64) {
 	waitForReceipt(channelStr, transactionStr)
 }
 
-func TestTransactionSubmit(t *testing.T) {
+func TestIntegrationTest(t *testing.T) {
 	blockHeightResp, err := client.ChannelHeight(hex.EncodeToString(channel[:]))
 	require.NoError(t, err)
 	blockExpirationNumber := blockHeightResp.Height.Height
@@ -165,7 +169,6 @@ func TestTransactionSubmit(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		// Submit.
 		nonce := uint64(mathrand.Intn(100))
-
 		blockExpirationNumber++
 
 		txResponse, err := client.TransactionSubmitCall(channelStr, seedStr, "args", []string{"a", "b", "c"}, nonce, blockExpirationNumber)
