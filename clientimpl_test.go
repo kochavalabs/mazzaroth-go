@@ -192,7 +192,7 @@ func TestTransactionSubmit(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
 
-	// Block lookup by height.
+	// Blocks from height.
 	blockListResponse, err := client.BlockListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
@@ -200,7 +200,7 @@ func TestTransactionSubmit(t *testing.T) {
 
 	blockID := hex.EncodeToString((*blockListResponse.Blocks)[1].Header.PreviousHeader[:])
 
-	// Block lookup by id.
+	// Blocks from id.
 	blockListResponse, err = client.BlockListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
@@ -231,12 +231,12 @@ func TestTransactionSubmit(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
 
-	// Block header lookup by block height.
+	// Block headers from block height.
 	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
 
-	// Block header lookup by block id.
+	// Block headers from block id.
 	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
