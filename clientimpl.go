@@ -193,7 +193,7 @@ func (c *ClientImpl) TransactionSubmitConfig(channelID string, seed string, owne
 	return response, nil
 }
 
-// TransactionUpdatePermission calls the endpoint: /v1/channels/{channel_id}/transactions for Config update transactions.
+// TransactionUpdatePermission calls the endpoint: /v1/channels/{channel_id}/transactions for Permission update transactions.
 func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
 	authorizedAddressStr string, alias string, authorizedAlias string, authorize bool) (*xdr.Response, error) {
 	channel, err := xdr.IDFromHexString(channelID)
