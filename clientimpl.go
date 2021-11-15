@@ -50,28 +50,6 @@ func NewMazzarothClient(servers []string, options ...Options) (*ClientImpl, erro
 	}, nil
 }
 
-// TransactionSubmit calls the endpoint: /v1/channels/{channel_id}/transactions.
-func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.Response, error) {
-	b, err := json.Marshal(transaction)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to json")
-	}
-
-	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
-	}
-
-	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
-
-	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
-	}
-
-	return response, nil
-}
-
 // TransactionSubmitCall calls the endpoint: /v1/channels/{channel_id}/transactions for Call transactions.
 func (c *ClientImpl) TransactionSubmitCall(channelID string, seed string, functionName string, parameters []string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
 	channel, err := xdr.IDFromHexString(channelID)

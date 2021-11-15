@@ -5,7 +5,6 @@ import "github.com/kochavalabs/mazzaroth-xdr/xdr"
 // Client defines a mazzaroth client that exposes common
 // endpoints exposed by a mazzaroth readonly node.
 type Client interface {
-	TransactionSubmit(transaction xdr.Transaction) (*xdr.Response, error)
 	TransactionSubmitCall(channelID string, seed string, functionName string, parameters []string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
 	TransactionSubmitContract(channelID string, seed string, contractBytes []byte, abiDef []byte, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
 	TransactionSubmitConfig(channelID string, seed string, owner string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
