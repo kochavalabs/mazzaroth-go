@@ -47,7 +47,7 @@ func (txb *TransactionBuilder) UpdateContract(address, channel *xdr.ID, nonce, b
 	return updateContractBuilder.UpdateContract(address, channel, nonce, blockExpirationNumber)
 }
 
-// func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
-// 	updatePermissionBuilder := new(UpdatePermissionBuilder)
-// 	return updatePermissionBuilder.UpdatePermission(address, channel, nonce, blockExpirationNumber)
-// }
+func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
+	updatePermissionBuilder := new(UpdatePermissionBuilder)
+	return updatePermissionBuilder.UpdatePermission(address, channel, nonce, blockExpirationNumber)
+}
