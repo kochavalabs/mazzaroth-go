@@ -102,6 +102,9 @@ func (c *ClientImpl) TransactionSubmitCall(channelID string, seed string, functi
 		Function(functionName).
 		Arguments(arguments...).
 		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
 
 	b, err := json.Marshal(transaction)
 	if err != nil {
@@ -152,7 +155,7 @@ func (c *ClientImpl) TransactionSubmitContract(channelID string, seed string, co
 		Contract(contractBytes).
 		Sign(privateKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to build contract")
+		return nil, errors.Wrap(err, "unable to sign the action")
 	}
 
 	b, err := json.Marshal(transaction)
@@ -194,13 +197,65 @@ func (c *ClientImpl) TransactionSubmitConfig(channelID string, seed string, owne
 		Owner(&address).
 		Sign(privateKey)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "unable to sign the action")
 	}
 
 	b, err := json.Marshal(transaction)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionUpdatePermission calls the endpoint: /v1/channels/{channel_id}/transactions for Config update transactions.
+func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
+	authorizedAddressStr string, alias string, authorizedAlias string, authorize bool) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	authorizedAddress, err := xdr.IDFromHexString(authorizedAddressStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to parse the authorized address")
+	}
+
+	upb := UpdatePermissionBuilder{}
+	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
+	transaction, err := upb.
+		Address(address).
+		Alias(alias).
+		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorize).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	fmt.Println(string(b))
 
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
 
@@ -371,6 +426,28 @@ func (c *ClientImpl) ChannelLookup(channelID string) (*xdr.Response, error) {
 // ChannelHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
 func (c *ClientImpl) ChannelHeight(channelID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks/height", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// AccountLookup calls the endpoint: /v1/channels/{channel_id}/accounts/{accout_id}.
+func (c *ClientImpl) AccountLookup(channelID string, seed string) (*xdr.Response, error) {
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s", c.serverSelector.Pick(), version, channelID, hex.EncodeToString(address[:]))
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {

@@ -3,6 +3,7 @@ package mazzaroth
 import (
 	"crypto/ed25519"
 	"encoding/hex"
+	"fmt"
 	"log"
 	mathrand "math/rand"
 	"os"
@@ -20,6 +21,7 @@ var servers = []string{"http://localhost:8081"}
 var channelStr string = "0000000000000000000000000000000000000000000000000000000000000000"
 var seedStr string = "0000000000000000000000000000000000000000000000000000000000000000"
 var addressStr string = "0000000000000000000000000000000000000000000000000000000000000000"
+var authorizedAddressStr string = "0000000000000000000000000000000000000000000000000000000000000001"
 
 var channel xdr.ID
 var address xdr.ID
@@ -74,9 +76,10 @@ func waitForReceipt(channelStr string, transactionIDstr string) {
 	for i := 0; i < 10; i++ {
 		response, err := client.ReceiptLookup(channelStr, transactionIDstr)
 		if err == nil {
+			log.Println("receipt -> ", response.Receipt)
 			return
 		}
-		log.Println(response)
+		// log.Println(response)
 		time.Sleep(1 * time.Second)
 	}
 
@@ -129,7 +132,7 @@ func TestIntegrationTest(t *testing.T) {
 
 	channelResponse, err := client.ChannelLookup(channelStr)
 	require.NoError(t, err)
-	require.Equal(t, channelResponse.Type, xdr.ResponseTypeCHANNEL)
+	require.Equal(t, xdr.ResponseTypeCHANNEL, channelResponse.Type)
 
 	var transactionStr string
 
@@ -150,12 +153,12 @@ func TestIntegrationTest(t *testing.T) {
 	// Transaction lookup.
 	txLookupResponse, err := client.TransactionLookup(channelStr, transactionStr)
 	require.NoError(t, err)
-	require.Equal(t, txLookupResponse.Type, xdr.ResponseTypeTRANSACTION)
+	require.Equal(t, xdr.ResponseTypeTRANSACTION, txLookupResponse.Type)
 
 	// Blocks from height.
 	blockListResponse, err := client.BlockListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
-	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
+	require.Equal(t, xdr.ResponseTypeBLOCKLIST, blockListResponse.Type)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
 	blockID := hex.EncodeToString((*blockListResponse.Blocks)[1].Header.PreviousHeader[:])
@@ -163,18 +166,18 @@ func TestIntegrationTest(t *testing.T) {
 	// Blocks from id.
 	blockListResponse, err = client.BlockListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
-	require.Equal(t, blockListResponse.Type, xdr.ResponseTypeBLOCKLIST)
+	require.Equal(t, xdr.ResponseTypeBLOCKLIST, blockListResponse.Type)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
 	// Block lookup.
 	blockResponse, err := client.BlockLookup(channelStr, blockID)
 	require.NoError(t, err)
-	require.Equal(t, blockResponse.Type, xdr.ResponseTypeBLOCK)
+	require.Equal(t, xdr.ResponseTypeBLOCK, blockResponse.Type)
 
 	// Receipt lookup.
 	receiptLookupResponse, err := client.ReceiptLookup(channelStr, transactionStr)
 	require.NoError(t, err)
-	require.Equal(t, receiptLookupResponse.Type, xdr.ResponseTypeRECEIPT)
+	require.Equal(t, xdr.ResponseTypeRECEIPT, receiptLookupResponse.Type)
 
 	// // Receipt lookup by height.
 	// receiptListLookupResponse, err := client.ReceiptListFromBlockHeight(channelStr, 2)
@@ -189,15 +192,59 @@ func TestIntegrationTest(t *testing.T) {
 	// Block header lookup.
 	blockHeaderLookupResponse, err := client.BlockHeaderLookup(channelStr, blockID)
 	require.NoError(t, err)
-	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADER)
+	require.Equal(t, xdr.ResponseTypeBLOCKHEADER, blockHeaderLookupResponse.Type)
 
 	// Block headers from block height.
 	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 2)
 	require.NoError(t, err)
-	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
+	require.Equal(t, xdr.ResponseTypeBLOCKHEADERLIST, blockHeaderLookupResponse.Type)
 
 	// Block headers from block id.
 	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockID(channelStr, blockID)
 	require.NoError(t, err)
-	require.Equal(t, blockHeaderLookupResponse.Type, xdr.ResponseTypeBLOCKHEADERLIST)
+	require.Equal(t, xdr.ResponseTypeBLOCKHEADERLIST, blockHeaderLookupResponse.Type)
+
+	// Channel lookup.
+	channelLookupResponse, err := client.ChannelLookup(channelStr)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeCHANNEL, channelLookupResponse.Type)
+
+	fmt.Println("***************************************************************************************")
+
+	// Authorize a key.
+	nonce := uint64(mathrand.Intn(100))
+	blockExpirationNumber++
+	alias := "the alias"
+	authorizedAlias := "the authorized alias"
+	permissionResponse, err := client.TransactionUpdatePermission(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, true)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
+
+	transactionStr = hex.EncodeToString((*permissionResponse.TransactionID)[:])
+	waitForReceipt(channelStr, transactionStr)
+
+	// Account lookup.
+	accountLookupResponse, err := client.AccountLookup(channelStr, seedStr)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
+	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[0].Key[:]))
+	require.Equal(t, "the authorized alias", accountLookupResponse.Account.AuthorizedAccounts[0].Alias)
+
+	// Unauthorize a key.
+	nonce = uint64(mathrand.Intn(100))
+	blockExpirationNumber++
+	alias = "the alias"
+	authorizedAlias = "the authorized alias"
+	permissionResponse, err = client.TransactionUpdatePermission(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, false)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
+
+	transactionStr = hex.EncodeToString((*permissionResponse.TransactionID)[:])
+	waitForReceipt(channelStr, transactionStr)
+
+	// Account lookup.
+	accountLookupResponse, err = client.AccountLookup(channelStr, seedStr)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
+	require.Equal(t, 0, len(accountLookupResponse.Account.AuthorizedAccounts))
 }
