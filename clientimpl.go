@@ -255,7 +255,7 @@ func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, 
 		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
 
-	fmt.Println(string(b))
+	// fmt.Println(string(b))
 
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
 
@@ -458,8 +458,8 @@ func (c *ClientImpl) AccountLookup(channelID string, seed string) (*xdr.Response
 }
 
 func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*xdr.Response, error) {
-	fmt.Println("--------------------------------------------------------------------------------------------------------")
-	fmt.Println(url)
+	// fmt.Println("--------------------------------------------------------------------------------------------------------")
+	// fmt.Println(url)
 
 	req, err := http.NewRequestWithContext(context.Background(), method, url, body)
 	if err != nil {
@@ -497,8 +497,8 @@ func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*
 		return nil, errors.Wrap(err, "could not read the body")
 	}
 
-	fmt.Println(string(responseBody))
-	fmt.Println("--------------------------------------------------------------------------------------------------------")
+	// fmt.Println(string(responseBody))
+	// fmt.Println("--------------------------------------------------------------------------------------------------------")
 
 	responseXDR := xdr.Response{}
 	err = responseXDR.UnmarshalJSON(responseBody)

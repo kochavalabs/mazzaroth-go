@@ -3,7 +3,6 @@ package mazzaroth
 import (
 	"crypto/ed25519"
 	"encoding/hex"
-	"fmt"
 	"log"
 	mathrand "math/rand"
 	"os"
@@ -209,8 +208,6 @@ func TestIntegrationTest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeCHANNEL, channelLookupResponse.Type)
 
-	fmt.Println("***************************************************************************************")
-
 	// Authorize a key.
 	nonce := uint64(mathrand.Intn(100))
 	blockExpirationNumber++
@@ -223,7 +220,7 @@ func TestIntegrationTest(t *testing.T) {
 	transactionStr = hex.EncodeToString((*permissionResponse.TransactionID)[:])
 	waitForReceipt(channelStr, transactionStr)
 
-	// Account lookup.
+	// Account lookup, the permission is there.
 	accountLookupResponse, err := client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
@@ -242,7 +239,7 @@ func TestIntegrationTest(t *testing.T) {
 	transactionStr = hex.EncodeToString((*permissionResponse.TransactionID)[:])
 	waitForReceipt(channelStr, transactionStr)
 
-	// Account lookup.
+	// Account lookup, the permission is gone.
 	accountLookupResponse, err = client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
