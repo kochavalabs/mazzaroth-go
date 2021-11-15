@@ -19,6 +19,7 @@ var servers = []string{"http://localhost:8081"}
 
 var channelStr string = "0000000000000000000000000000000000000000000000000000000000000000"
 var seedStr string = "0000000000000000000000000000000000000000000000000000000000000000"
+var addressStr string = "0000000000000000000000000000000000000000000000000000000000000000"
 
 var channel xdr.ID
 var address xdr.ID
@@ -83,19 +84,10 @@ func waitForReceipt(channelStr string, transactionIDstr string) {
 }
 
 func setOwner(blockHeight uint64) {
-	nonce := mathrand.Intn(100000000000000)
-
-	ucb := UpdateConfigBuilder{}
-	ucb.UpdateConfig(&address, &channel, uint64(nonce), blockHeight+10)
-	transaction, err := ucb.
-		Owner(&address).
-		Sign(privateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
+	nonce := uint64(mathrand.Intn(100000000000000))
 
 	// Execute the transaction.
-	txResponse, err := client.TransactionSubmit(*transaction)
+	txResponse, err := client.TransactionSubmitConfig(channelStr, seedStr, addressStr, nonce, blockHeight)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -112,13 +104,6 @@ func uploadContract(blockHeight uint64) {
 		log.Fatal(err)
 	}
 
-	// // Load the ABI.
-	// var abi xdr.Abi
-	// err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	// Contract.
 	contract, err := os.ReadFile(dataDir + "/contract.wasm")
 	if err != nil {
@@ -126,24 +111,6 @@ func uploadContract(blockHeight uint64) {
 	}
 
 	nonce := uint64(mathrand.Intn(100000000000000))
-
-	// // Create the transaction.
-	// ucb := UpdateContractBuilder{}
-
-	// txTransacion, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockHeight).
-	// 	Version(version).
-	// 	Abi(abi).
-	// 	Contract(contract).
-	// 	Sign(privateKey)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// // Execute the transaction.
-	// txResponse, err := client.TransactionSubmit(*txTransacion)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	// Execute the transaction.
 	txResponse, err := client.TransactionSubmitContract(channelStr, seedStr, contract, abiDef, nonce, blockHeight)

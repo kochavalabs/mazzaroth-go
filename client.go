@@ -8,6 +8,7 @@ type Client interface {
 	TransactionSubmit(transaction xdr.Transaction) (*xdr.Response, error)
 	TransactionSubmitCall(channelID string, seed string, functionName string, parameters []string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
 	TransactionSubmitContract(channelID string, seed string, contractBytes []byte, abiDef []byte, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
+	TransactionSubmitConfig(channelID string, seed string, owner string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error)
 	TransactionLookup(channelID string, transactionID string) (*xdr.Response, error)
 	TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error)
 	TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error)
