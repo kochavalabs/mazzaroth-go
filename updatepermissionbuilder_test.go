@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
-	"github.com/stretchr/testify/require"
 )
 
 func TestUpdatePermissionBuilder(t *testing.T) {
@@ -65,7 +64,6 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}
