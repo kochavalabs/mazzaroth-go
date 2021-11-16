@@ -1,5 +1,3 @@
-// +build integration
-
 package mazzaroth
 
 import (
@@ -53,7 +51,7 @@ func init() {
 		log.Fatal(err)
 	}
 
-	blockHeightResp, err := client.ChannelHeight(hex.EncodeToString(channel[:]))
+	blockHeightResp, err := client.BlockHeight(hex.EncodeToString(channel[:]))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,7 +125,7 @@ func uploadContract(blockHeight uint64) {
 }
 
 func TestIntegrationTest(t *testing.T) {
-	blockHeightResp, err := client.ChannelHeight(hex.EncodeToString(channel[:]))
+	blockHeightResp, err := client.BlockHeight(hex.EncodeToString(channel[:]))
 	require.NoError(t, err)
 	blockExpirationNumber := blockHeightResp.Height.Height
 
@@ -157,18 +155,12 @@ func TestIntegrationTest(t *testing.T) {
 	require.Equal(t, xdr.ResponseTypeTRANSACTION, txLookupResponse.Type)
 
 	// Blocks from height.
-	blockListResponse, err := client.BlockListFromBlockHeight(channelStr, 2)
+	blockListResponse, err := client.BlockList(channelStr, 2, 1)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeBLOCKLIST, blockListResponse.Type)
 	require.True(t, len(*blockListResponse.Blocks) > 0)
 
-	blockID := hex.EncodeToString((*blockListResponse.Blocks)[1].Header.PreviousHeader[:])
-
-	// Blocks from id.
-	blockListResponse, err = client.BlockListFromBlockID(channelStr, blockID)
-	require.NoError(t, err)
-	require.Equal(t, xdr.ResponseTypeBLOCKLIST, blockListResponse.Type)
-	require.True(t, len(*blockListResponse.Blocks) > 0)
+	blockID := hex.EncodeToString((*blockListResponse.Blocks)[0].Header.PreviousHeader[:])
 
 	// Block lookup.
 	blockResponse, err := client.BlockLookup(channelStr, blockID)

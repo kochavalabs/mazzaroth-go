@@ -14,7 +14,6 @@ type UpdatePermissionBuilder struct {
 	signer                *xdr.Authority
 	accountUpdateType     xdr.AccountUpdateType
 	key                   xdr.ID
-	alias                 string
 	authorizedAccount     xdr.ID
 	authorizedAlias       string
 	authorize             bool
@@ -30,11 +29,6 @@ func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel *xdr.ID, n
 
 func (upb *UpdatePermissionBuilder) Address(address xdr.ID) *UpdatePermissionBuilder {
 	upb.key = address
-	return upb
-}
-
-func (upb *UpdatePermissionBuilder) Alias(alias string) *UpdatePermissionBuilder {
-	upb.alias = alias
 	return upb
 }
 
@@ -58,8 +52,7 @@ func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transactio
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeACCOUNT,
 				Account: &xdr.AccountUpdate{
-					Type:  upb.accountUpdateType,
-					Alias: &upb.alias,
+					Type: upb.accountUpdateType,
 					Authorization: &xdr.Authorization{
 						Account: xdr.AuthorizedAccount{
 							Key:   upb.authorizedAccount,

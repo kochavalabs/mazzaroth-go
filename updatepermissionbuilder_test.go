@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpdatePermissionBuilder(t *testing.T) {
-	alias := "the alias"
 	authorizedAlias := "the authorized alias"
 	authorized := true
 	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
@@ -37,7 +37,6 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 						},
 						Authorize: authorized,
 					},
-					Alias: &alias,
 				},
 			},
 		},
@@ -58,12 +57,12 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 	ub := new(UpdatePermissionBuilder)
 	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
 		Address(testAddress).
-		Alias(alias).
 		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorized).
 		Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}
+	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}

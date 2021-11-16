@@ -221,7 +221,6 @@ func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, 
 	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
 	transaction, err := upb.
 		Address(address).
-		Alias(alias).
 		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorize).
 		Sign(privateKey)
 	if err != nil {
@@ -329,25 +328,13 @@ func (c *ClientImpl) BlockLookup(channelID, blockID string) (*xdr.Response, erro
 	return response, nil
 }
 
-// BlockListFromBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
-func (c *ClientImpl) BlockListFromBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blocks?number=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+// BlockList calls the endpoint: /v1/channels/{channel_id}/blocks?{number,height}.
+func (c *ClientImpl) BlockList(channelID string, blockHeight int, number int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks?height=%d&number=%d", c.serverSelector.Pick(), version, channelID, blockHeight, number)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make a request to block by height lookup endpoint")
-	}
-
-	return response, nil
-}
-
-// BlockListFromBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
-func (c *ClientImpl) BlockListFromBlockID(channelID string, blockID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blocks?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
-
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to block by blockid lookup endpoint")
 	}
 
 	return response, nil
@@ -436,8 +423,8 @@ func (c *ClientImpl) AccountLookup(channelID string, seed string) (*xdr.Response
 }
 
 func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*xdr.Response, error) {
-	// fmt.Println("--------------------------------------------------------------------------------------------------------")
-	// fmt.Println(url)
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
+	fmt.Println(url)
 
 	req, err := http.NewRequestWithContext(context.Background(), method, url, body)
 	if err != nil {
@@ -475,8 +462,8 @@ func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*
 		return nil, errors.Wrap(err, "could not read the body")
 	}
 
-	// fmt.Println(string(responseBody))
-	// fmt.Println("--------------------------------------------------------------------------------------------------------")
+	fmt.Println(string(responseBody))
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
 
 	responseXDR := xdr.Response{}
 	err = responseXDR.UnmarshalJSON(responseBody)
