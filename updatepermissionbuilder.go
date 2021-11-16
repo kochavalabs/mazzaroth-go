@@ -41,7 +41,7 @@ func (upb *UpdatePermissionBuilder) Alias(alias string) *UpdatePermissionBuilder
 func (upb *UpdatePermissionBuilder) Authorize(accountUpdateType xdr.AccountUpdateType, account xdr.ID, alias string, authorize bool) *UpdatePermissionBuilder {
 	upb.accountUpdateType = accountUpdateType
 	upb.authorizedAccount = account
-	upb.alias = alias
+	upb.authorizedAlias = alias
 	upb.authorize = authorize
 	return upb
 }
@@ -63,7 +63,7 @@ func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transactio
 					Authorization: &xdr.Authorization{
 						Account: xdr.AuthorizedAccount{
 							Key:   upb.authorizedAccount,
-							Alias: upb.alias,
+							Alias: upb.authorizedAlias,
 						},
 						Authorize: upb.authorize,
 					},

@@ -37,7 +37,7 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 						},
 						Authorize: authorized,
 					},
-					Alias: &authorizedAlias,
+					Alias: &alias,
 				},
 			},
 		},
