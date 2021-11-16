@@ -256,7 +256,7 @@ func (c *ClientImpl) TransactionLookup(channelID string, transactionID string) (
 	return response, nil
 }
 
-// TransactionLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+// TransactionLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?{blockHeight}.
 func (c *ClientImpl) TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
 
@@ -268,7 +268,7 @@ func (c *ClientImpl) TransactionLookupByBlockHeight(channelID string, blockHeigh
 	return response, nil
 }
 
-// TransactionLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
+// TransactionLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?{blockID}.
 func (c *ClientImpl) TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
 
@@ -328,7 +328,7 @@ func (c *ClientImpl) BlockHeaderLookup(channelID, blockID string) (*xdr.Response
 	return response, nil
 }
 
-// BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+// BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/blockheaders?{blockHeight,number}.
 func (c *ClientImpl) BlockHeaderList(channelID string, blockHeight int, number int) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?height=%d&number=%d", c.serverSelector.Pick(), version, channelID, blockHeight, number)
 
