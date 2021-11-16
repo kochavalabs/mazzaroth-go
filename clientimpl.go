@@ -50,43 +50,16 @@ func NewMazzarothClient(servers []string, options ...Options) (*ClientImpl, erro
 	}, nil
 }
 
-// TransactionSubmitCall calls the endpoint: /v1/channels/{channel_id}/transactions for Call transactions.
-func (c *ClientImpl) TransactionSubmitCall(channelID string, seed string, functionName string, parameters []string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
-	channel, err := xdr.IDFromHexString(channelID)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to extract channel id")
-	}
-
-	seedBin, err := hex.DecodeString(seed)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to decode seed")
-	}
-
-	privateKey := ed25519.NewKeyFromSeed(seedBin)
-	address, err := xdr.IDFromPublicKey(privateKey.Public())
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to create private key")
-	}
-
-	var arguments []xdr.Argument
-	for _, a := range parameters {
-		arguments = append(arguments, String(a))
-	}
-
-	builder := CallBuilder{}
-
-	transaction, err := builder.
-		Call(&address, &channel, nonce, blockExpirationNumber).
-		Function(functionName).
-		Arguments(arguments...).
-		Sign(privateKey)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to sign the action")
-	}
-
+// TransactionSubmit calls the endpoint: /v1/channels/{channel_id}/transactions.
+func (c *ClientImpl) TransactionSubmit(transaction *xdr.Transaction) (*xdr.Response, error) {
 	b, err := json.Marshal(transaction)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
 	}
 
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)

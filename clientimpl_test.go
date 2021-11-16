@@ -1,8 +1,10 @@
 package mazzaroth
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
+	"encoding/json"
 	"log"
 	mathrand "math/rand"
 	"os"
@@ -24,6 +26,7 @@ var authorizedAddressStr string = "000000000000000000000000000000000000000000000
 
 var channel xdr.ID
 var address xdr.ID
+var authorizedAddress xdr.ID
 var privateKey ed25519.PrivateKey
 var client Client
 
@@ -42,6 +45,11 @@ func init() {
 
 	privateKey = ed25519.NewKeyFromSeed(seed)
 	address, err = xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	authorizedAddress, err = xdr.IDFromHexString(authorizedAddressStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,10 +94,19 @@ func waitForReceipt(channelStr string, transactionIDstr string) {
 }
 
 func setOwner(blockHeight uint64) {
-	nonce := uint64(mathrand.Intn(100000000000000))
+	nonce := mathrand.Intn(100000000000000)
+
+	ucb := UpdateConfigBuilder{}
+	ucb.UpdateConfig(&address, &channel, uint64(nonce), blockHeight+10)
+	transaction, err := ucb.
+		Owner(&address).
+		Sign(privateKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Execute the transaction.
-	txResponse, err := client.TransactionSubmitConfig(channelStr, seedStr, addressStr, nonce, blockHeight)
+	txResponse, err := client.TransactionSubmit(transaction)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -106,16 +123,35 @@ func uploadContract(blockHeight uint64) {
 		log.Fatal(err)
 	}
 
+	// Load the ABI.
+	var abi xdr.Abi
+	err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Contract.
 	contract, err := os.ReadFile(dataDir + "/contract.wasm")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	nonce := uint64(mathrand.Intn(100000000000000))
+	nonce := mathrand.Intn(100000000000000)
+
+	// Create the transaction.
+	ucb := UpdateContractBuilder{}
+
+	txTransacion, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockHeight).
+		Version(version).
+		Abi(abi).
+		Contract(contract).
+		Sign(privateKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Execute the transaction.
-	txResponse, err := client.TransactionSubmitContract(channelStr, seedStr, contract, abiDef, nonce, blockHeight)
+	txResponse, err := client.TransactionSubmit(txTransacion)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +176,16 @@ func TestIntegrationTest(t *testing.T) {
 		nonce := uint64(mathrand.Intn(100))
 		blockExpirationNumber++
 
-		txResponse, err := client.TransactionSubmitCall(channelStr, seedStr, "args", []string{"a", "b", "c"}, nonce, blockExpirationNumber)
+		builder := TransactionBuilder{}
+		transaction, err := builder.
+			Call(&address, &channel, nonce, blockExpirationNumber).
+			Function("args").
+			Arguments([]xdr.Argument{String("a"), String("b"), String("c")}...).
+			Sign(privateKey)
+		require.NoError(t, err)
+
+		txResponse, err := client.TransactionSubmit(transaction)
+
 		require.NoError(t, err)
 		require.Equal(t, txResponse.Type, xdr.ResponseTypeTRANSACTIONID)
 
@@ -190,9 +235,15 @@ func TestIntegrationTest(t *testing.T) {
 	// Authorize a key.
 	nonce := uint64(mathrand.Intn(100))
 	blockExpirationNumber++
-	alias := "the alias"
 	authorizedAlias := "the authorized alias"
-	permissionResponse, err := client.TransactionUpdateAuthorization(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, true)
+
+	authBuilder := UpdateAuthorizationBuilder{}
+	transaction, err := authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
+		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, true).
+		Sign(privateKey)
+	require.NoError(t, err)
+
+	permissionResponse, err := client.TransactionSubmit(transaction)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
 
@@ -203,15 +254,20 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err := client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[0].Key[:]))
+	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[1].Key[:]))
 	require.Equal(t, "the authorized alias", accountLookupResponse.Account.AuthorizedAccounts[0].Alias)
 
 	// Unauthorize a key.
 	nonce = uint64(mathrand.Intn(100))
 	blockExpirationNumber++
-	alias = "the alias"
 	authorizedAlias = "the authorized alias"
-	permissionResponse, err = client.TransactionUpdateAuthorization(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, false)
+
+	transaction, err = authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
+		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, false).
+		Sign(privateKey)
+	require.NoError(t, err)
+
+	permissionResponse, err = client.TransactionSubmit(transaction)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
 
@@ -222,5 +278,5 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err = client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, 0, len(accountLookupResponse.Account.AuthorizedAccounts))
+	require.Equal(t, 1, len(accountLookupResponse.Account.AuthorizedAccounts))
 }
