@@ -279,4 +279,9 @@ func TestIntegrationTest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
 	require.Equal(t, 1, len(accountLookupResponse.Account.AuthorizedAccounts))
+
+	// Check channel abi.
+	abiResponse, err := client.ChannelAbi(channelStr)
+	require.NoError(t, err)
+	require.Equal(t, xdr.ResponseTypeABI, abiResponse.Type)
 }

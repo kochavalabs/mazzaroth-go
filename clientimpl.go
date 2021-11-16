@@ -325,6 +325,18 @@ func (c *ClientImpl) ChannelLookup(channelID string) (*xdr.Response, error) {
 	return response, nil
 }
 
+// ChannelAbi calls the endpoint: /v1/channels/{channel_id}/abi.
+func (c *ClientImpl) ChannelAbi(channelID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/abi", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
 // BlockHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
 func (c *ClientImpl) BlockHeight(channelID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks/height", c.serverSelector.Pick(), version, channelID)

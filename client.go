@@ -15,6 +15,7 @@ type Client interface {
 	BlockHeaderLookup(channelID string, blockID string) (*xdr.Response, error)
 	BlockHeaderList(channelID string, blockHeight int, number int) (*xdr.Response, error)
 	ChannelLookup(channelID string) (*xdr.Response, error)
+	ChannelAbi(channelID string) (*xdr.Response, error)
 	BlockHeight(channelID string) (*xdr.Response, error)
 	AccountLookup(channelID string, accountID string) (*xdr.Response, error)
 }
