@@ -401,8 +401,8 @@ func (c *ClientImpl) ChannelLookup(channelID string) (*xdr.Response, error) {
 	return response, nil
 }
 
-// ChannelHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
-func (c *ClientImpl) ChannelHeight(channelID string) (*xdr.Response, error) {
+// BlockHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
+func (c *ClientImpl) BlockHeight(channelID string) (*xdr.Response, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks/height", c.serverSelector.Pick(), version, channelID)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
