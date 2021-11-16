@@ -318,8 +318,8 @@ func (c *ClientImpl) ReceiptLookup(channelID, transactionID string) (*xdr.Respon
 // }
 
 // BlockLookup calls the endpoint: /v1/channels/{channel_id}/blocks/{id}.
-func (c *ClientImpl) BlockLookup(channelID, transactionID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blocks/%s", c.serverSelector.Pick(), version, channelID, transactionID)
+func (c *ClientImpl) BlockLookup(channelID, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks/%s", c.serverSelector.Pick(), version, channelID, blockID)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
@@ -354,8 +354,8 @@ func (c *ClientImpl) BlockListFromBlockID(channelID string, blockID string) (*xd
 }
 
 // BlockHeaderLookup calls the endpoint: /v1/channels/{channel_id}/blockheaders/{id}.
-func (c *ClientImpl) BlockHeaderLookup(channelID, transactionID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders/%s", c.serverSelector.Pick(), version, channelID, transactionID)
+func (c *ClientImpl) BlockHeaderLookup(channelID, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders/%s", c.serverSelector.Pick(), version, channelID, blockID)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
