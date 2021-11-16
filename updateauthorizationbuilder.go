@@ -12,7 +12,6 @@ type UpdateAuthorizationBuilder struct {
 	nonce                 uint64
 	blockExpirationNumber uint64
 	signer                *xdr.Authority
-	accountUpdateType     xdr.AccountUpdateType
 	key                   xdr.ID
 	authorizedAccount     xdr.ID
 	authorizedAlias       string
@@ -32,8 +31,7 @@ func (upb *UpdateAuthorizationBuilder) Address(address xdr.ID) *UpdateAuthorizat
 	return upb
 }
 
-func (upb *UpdateAuthorizationBuilder) Authorize(accountUpdateType xdr.AccountUpdateType, account xdr.ID, alias string, authorize bool) *UpdateAuthorizationBuilder {
-	upb.accountUpdateType = accountUpdateType
+func (upb *UpdateAuthorizationBuilder) Authorize(account xdr.ID, alias string, authorize bool) *UpdateAuthorizationBuilder {
 	upb.authorizedAccount = account
 	upb.authorizedAlias = alias
 	upb.authorize = authorize
@@ -52,7 +50,7 @@ func (upb *UpdateAuthorizationBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transac
 			Update: &xdr.Update{
 				Type: xdr.UpdateTypeACCOUNT,
 				Account: &xdr.AccountUpdate{
-					Type: upb.accountUpdateType,
+					Type: xdr.AccountUpdateTypeAUTHORIZATION,
 					Authorization: &xdr.Authorization{
 						Account: xdr.AuthorizedAccount{
 							Key:   upb.authorizedAccount,

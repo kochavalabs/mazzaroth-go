@@ -57,7 +57,7 @@ func TestUpdateAuthorizationBuilder(t *testing.T) {
 	ub := new(UpdateAuthorizationBuilder)
 	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
 		Address(testAddress).
-		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorized).
+		Authorize(authorizedAddress, authorizedAlias, authorized).
 		Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)

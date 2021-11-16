@@ -239,7 +239,7 @@ func TestIntegrationTest(t *testing.T) {
 
 	authBuilder := UpdateAuthorizationBuilder{}
 	transaction, err := authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
-		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, true).
+		Authorize(authorizedAddress, authorizedAlias, true).
 		Sign(privateKey)
 	require.NoError(t, err)
 
@@ -263,7 +263,7 @@ func TestIntegrationTest(t *testing.T) {
 	authorizedAlias = "the authorized alias"
 
 	transaction, err = authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
-		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, false).
+		Authorize(authorizedAddress, authorizedAlias, false).
 		Sign(privateKey)
 	require.NoError(t, err)
 

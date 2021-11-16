@@ -194,7 +194,7 @@ func (c *ClientImpl) TransactionUpdateAuthorization(channelID string, seed strin
 	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
 	transaction, err := upb.
 		Address(address).
-		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorize).
+		Authorize(authorizedAddress, authorizedAlias, authorize).
 		Sign(privateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to sign the action")
