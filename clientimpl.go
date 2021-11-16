@@ -217,7 +217,7 @@ func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, 
 		return nil, errors.Wrap(err, "unable to parse the authorized address")
 	}
 
-	upb := UpdatePermissionBuilder{}
+	upb := UpdateAuthorizationBuilder{}
 	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
 	transaction, err := upb.
 		Address(address).

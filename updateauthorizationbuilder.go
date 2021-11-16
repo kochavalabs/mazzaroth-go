@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type UpdatePermissionBuilder struct {
+type UpdateAuthorizationBuilder struct {
 	address, channel      *xdr.ID
 	nonce                 uint64
 	blockExpirationNumber uint64
@@ -19,7 +19,7 @@ type UpdatePermissionBuilder struct {
 	authorize             bool
 }
 
-func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
+func (upb *UpdateAuthorizationBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateAuthorizationBuilder {
 	upb.address = address
 	upb.channel = channel
 	upb.nonce = nonce
@@ -27,12 +27,12 @@ func (upb *UpdatePermissionBuilder) UpdatePermission(address, channel *xdr.ID, n
 	return upb
 }
 
-func (upb *UpdatePermissionBuilder) Address(address xdr.ID) *UpdatePermissionBuilder {
+func (upb *UpdateAuthorizationBuilder) Address(address xdr.ID) *UpdateAuthorizationBuilder {
 	upb.key = address
 	return upb
 }
 
-func (upb *UpdatePermissionBuilder) Authorize(accountUpdateType xdr.AccountUpdateType, account xdr.ID, alias string, authorize bool) *UpdatePermissionBuilder {
+func (upb *UpdateAuthorizationBuilder) Authorize(accountUpdateType xdr.AccountUpdateType, account xdr.ID, alias string, authorize bool) *UpdateAuthorizationBuilder {
 	upb.accountUpdateType = accountUpdateType
 	upb.authorizedAccount = account
 	upb.authorizedAlias = alias
@@ -40,7 +40,7 @@ func (upb *UpdatePermissionBuilder) Authorize(accountUpdateType xdr.AccountUpdat
 	return upb
 }
 
-func (upb *UpdatePermissionBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+func (upb *UpdateAuthorizationBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 
 	action := xdr.Action{
 		Address:               *upb.address,

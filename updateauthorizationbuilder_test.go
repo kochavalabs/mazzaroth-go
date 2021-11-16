@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdatePermissionBuilder(t *testing.T) {
+func TestUpdateAuthorizationBuilder(t *testing.T) {
 	authorizedAlias := "the authorized alias"
 	authorized := true
 	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
@@ -54,7 +54,7 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 		Signature: signature,
 		Action:    action,
 	}
-	ub := new(UpdatePermissionBuilder)
+	ub := new(UpdateAuthorizationBuilder)
 	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
 		Address(testAddress).
 		Authorize(xdr.AccountUpdateTypeAUTHORIZATION, authorizedAddress, authorizedAlias, authorized).
