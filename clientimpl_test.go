@@ -154,7 +154,7 @@ func TestIntegrationTest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeTRANSACTION, txLookupResponse.Type)
 
-	// Blocks from height.
+	// Blocks list.
 	blockListResponse, err := client.BlockList(channelStr, 2, 1)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeBLOCKLIST, blockListResponse.Type)
@@ -172,28 +172,13 @@ func TestIntegrationTest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeRECEIPT, receiptLookupResponse.Type)
 
-	// // Receipt lookup by height.
-	// receiptListLookupResponse, err := client.ReceiptListFromBlockHeight(channelStr, 2)
-	// require.NoError(t, err)
-	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
-
-	// // Receipt lookup by block id.
-	// receiptListLookupResponse, err := client.ReceiptListFromBlockID(channelStr, blockID)
-	// require.NoError(t, err)
-	// require.Equal(t, receiptListLookupResponse.Type, xdr.ResponseTypeRECEIPTLIST)
-
 	// Block header lookup.
 	blockHeaderLookupResponse, err := client.BlockHeaderLookup(channelStr, blockID)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeBLOCKHEADER, blockHeaderLookupResponse.Type)
 
-	// Block headers from block height.
-	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockHeight(channelStr, 2)
-	require.NoError(t, err)
-	require.Equal(t, xdr.ResponseTypeBLOCKHEADERLIST, blockHeaderLookupResponse.Type)
-
-	// Block headers from block id.
-	blockHeaderLookupResponse, err = client.BlockHeaderListFromBlockID(channelStr, blockID)
+	// Block header list.
+	blockHeaderLookupResponse, err = client.BlockHeaderList(channelStr, 2, 1)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeBLOCKHEADERLIST, blockHeaderLookupResponse.Type)
 
@@ -207,7 +192,7 @@ func TestIntegrationTest(t *testing.T) {
 	blockExpirationNumber++
 	alias := "the alias"
 	authorizedAlias := "the authorized alias"
-	permissionResponse, err := client.TransactionUpdatePermission(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, true)
+	permissionResponse, err := client.TransactionUpdateAuthorization(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, true)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
 
@@ -226,7 +211,7 @@ func TestIntegrationTest(t *testing.T) {
 	blockExpirationNumber++
 	alias = "the alias"
 	authorizedAlias = "the authorized alias"
-	permissionResponse, err = client.TransactionUpdatePermission(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, false)
+	permissionResponse, err = client.TransactionUpdateAuthorization(channelStr, seedStr, nonce, blockExpirationNumber, authorizedAddressStr, alias, authorizedAlias, false)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeTRANSACTIONID, permissionResponse.Type)
 

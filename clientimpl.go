@@ -193,8 +193,8 @@ func (c *ClientImpl) TransactionSubmitConfig(channelID string, seed string, owne
 	return response, nil
 }
 
-// TransactionUpdatePermission calls the endpoint: /v1/channels/{channel_id}/transactions for Permission update transactions.
-func (c *ClientImpl) TransactionUpdatePermission(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
+// TransactionUpdateAuthorization calls the endpoint: /v1/channels/{channel_id}/transactions for Authorization update transactions.
+func (c *ClientImpl) TransactionUpdateAuthorization(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
 	authorizedAddressStr string, alias string, authorizedAlias string, authorize bool) (*xdr.Response, error) {
 	channel, err := xdr.IDFromHexString(channelID)
 	if err != nil {
@@ -352,25 +352,13 @@ func (c *ClientImpl) BlockHeaderLookup(channelID, blockID string) (*xdr.Response
 	return response, nil
 }
 
-// BlockHeaderListFromBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
-func (c *ClientImpl) BlockHeaderListFromBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+// BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/transactions?blockheight={blockHeight}.
+func (c *ClientImpl) BlockHeaderList(channelID string, blockHeight int, number int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?height=%d&number=%d", c.serverSelector.Pick(), version, channelID, blockHeight, number)
 
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make a request to blockheaders by blockheight lookup endpoint")
-	}
-
-	return response, nil
-}
-
-// BlockHeaderListFromBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?blockid={blockID}.
-func (c *ClientImpl) BlockHeaderListFromBlockID(channelID string, blockID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
-
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to blockheaders by blockid lookup endpoint")
 	}
 
 	return response, nil
