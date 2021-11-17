@@ -3,17 +3,25 @@ package mazzaroth
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
+	"crypto/ed25519"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 	"github.com/pkg/errors"
 )
+
+const version = "v1"
+
+// ErrNotFound is raised when the searched entity is not found.
+var ErrNotFound = errors.New("entity not found")
+
+// ErrInternalServer is raised after a 500 status code.
+var ErrInternalServer = errors.New("internal server error")
 
 var _ Client = &ClientImpl{}
 
@@ -42,248 +50,332 @@ func NewMazzarothClient(servers []string, options ...Options) (*ClientImpl, erro
 	}, nil
 }
 
-// TransactionSubmit calls the endpoint: /transaction/submit.
-func (c *ClientImpl) TransactionSubmit(transaction xdr.Transaction) (*xdr.TransactionSubmitResponse, error) {
-	transactionRequest := xdr.TransactionSubmitRequest{
-		Transaction: transaction,
-	}
-
-	xdrRequest, err := transactionRequest.MarshalBinary()
+// TransactionSubmit calls the endpoint: /v1/channels/{channel_id}/transactions.
+func (c *ClientImpl) TransactionSubmit(transaction *xdr.Transaction) (*xdr.Response, error) {
+	b, err := json.Marshal(transaction)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
+		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
 
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/transaction/submit", xdrRequest)
+	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
-	}
-
-	response := xdr.TransactionSubmitResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// TransactionLookup calls the endpoint: /transaction/lookup.
-func (c *ClientImpl) TransactionLookup(transactionID xdr.ID) (*xdr.TransactionLookupResponse, error) {
-	request := xdr.TransactionLookupRequest{
-		TransactionID: transactionID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/transaction/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call transaction lookup endpoint")
-	}
-
-	response := xdr.TransactionLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// ReceiptLookup calls the endpoint: /receipt/lookup.
-func (c *ClientImpl) ReceiptLookup(transactionID xdr.ID) (*xdr.ReceiptLookupResponse, error) {
-	request := xdr.ReceiptLookupRequest{
-		TransactionID: transactionID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/receipt/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call the receipt lookup endpoint")
-	}
-
-	response := xdr.ReceiptLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// BlockLookup calls the endpoint: /block/lookup.
-func (c *ClientImpl) BlockLookup(blockID xdr.Identifier) (*xdr.BlockLookupResponse, error) {
-	request := xdr.BlockLookupRequest{
-		Identifier: blockID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/block/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call block lookup endpoint")
-	}
-
-	response := xdr.BlockLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// BlockHeaderLookup calls the endpoint: /block/header/lookup.
-func (c *ClientImpl) BlockHeaderLookup(blockID xdr.Identifier) (*xdr.BlockHeaderLookupResponse, error) {
-	request := xdr.BlockHeaderLookupRequest{
-		Identifier: blockID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/block/header/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call block header lookup endpoint")
-	}
-
-	response := xdr.BlockHeaderLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// AccountInfoLookup calls the endpoint: /account/info/lookup.
-func (c *ClientImpl) AccountInfoLookup(accountID xdr.ID) (*xdr.AccountInfoLookupResponse, error) {
-	request := xdr.AccountInfoLookupRequest{
-		Account: accountID,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/account/info/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call account info lookup endpoint")
-	}
-
-	response := xdr.AccountInfoLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// ChannelInfoLookup calls the endpoint: /channel/info/lookup.
-func (c *ClientImpl) ChannelInfoLookup(channelInfoType xdr.ChannelInfoType) (*xdr.ChannelInfoLookupResponse, error) {
-	request := xdr.ChannelInfoLookupRequest{
-		InfoType: channelInfoType,
-	}
-
-	xdrRequest, err := request.MarshalBinary()
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to marshal to xdr binary")
-	}
-
-	binaryResp, err := makeRequest(c.httpClient, c.serverSelector.Pick()+"/channel/info/lookup", xdrRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to call channel info lookup endpoint")
-	}
-
-	response := xdr.ChannelInfoLookupResponse{}
-	if err := response.UnmarshalBinary(binaryResp); err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal xdr response")
-	}
-	return &response, nil
-}
-
-// BlockHeightLookup retrieves the current block height
-// This endpoint uses JSON so does not need to use XDR or base64 encoding
-func (c *ClientImpl) BlockHeightLookup() (uint64, error) {
-	url := c.serverSelector.Pick() + "/ledger/height"
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
-	if err != nil {
-		return 0, errors.Wrap(err, "unable to create a new request")
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return 0, errors.Wrap(err, "unable to make http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return 0, errors.New("status code is not OK")
-	}
-
-	var blockHeight uint64
-	err = json.NewDecoder(resp.Body).Decode(&blockHeight)
-	if err != nil {
-		return 0, errors.Wrap(err, "unable to decode response")
-	}
-
-	return blockHeight, nil
-}
-
-type abiRequest struct {
-	// ChannelID as hex string
-	ChannelID string
-}
-
-// AbiLookup retrieves the ABI for a given channel ID
-// This endpoint uses JSON so does not need to use XDR or base64 encoding
-func (c *ClientImpl) AbiLookup(channelID xdr.ID) (*xdr.Abi, error) {
-	channelIDHex := make([]byte, len(channelID[:])*2)
-	hex.Encode(channelIDHex, channelID[:])
-
-	request := abiRequest{
-		ChannelID: string(channelIDHex),
-	}
-
-	body, err := json.Marshal(request)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to create a new request")
-	}
-
-	url := c.serverSelector.Pick() + "/abi"
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, bytes.NewBuffer(body))
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to create a new request")
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("status code is not OK")
-	}
-
-	response := &xdr.Abi{}
-	err = json.NewDecoder(resp.Body).Decode(response)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to decode response")
 	}
 
 	return response, nil
 }
 
-// Requests are made by encoding the XDR Object bytes into base64 and sending in the request body
-// The response, if OK, is decoded from base64 and returned as XDR Bytes
-func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte, error) {
-	b64request := base64.StdEncoding.WithPadding(base64.StdPadding).EncodeToString(xdrRequest)
+// TransactionSubmitContract calls the endpoint: /v1/channels/{channel_id}/transactions for Contract update transactions.
+func (c *ClientImpl) TransactionSubmitContract(channelID string, seed string, contractBytes []byte, abiDef []byte, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, strings.NewReader(b64request))
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	// Load the ABI.
+	var abi xdr.Abi
+	err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode abi")
+	}
+
+	// Create the transaction.
+	ucb := UpdateContractBuilder{}
+
+	transaction, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockExpirationNumber).
+		Version(version).
+		Abi(abi).
+		Contract(contractBytes).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionSubmitConfig calls the endpoint: /v1/channels/{channel_id}/transactions for Config update transactions.
+func (c *ClientImpl) TransactionSubmitConfig(channelID string, seed string, owner string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	ucb := UpdateConfigBuilder{}
+	ucb.UpdateConfig(&address, &channel, uint64(nonce), blockExpirationNumber)
+	transaction, err := ucb.
+		Owner(&address).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionUpdateAuthorization calls the endpoint: /v1/channels/{channel_id}/transactions for Authorization update transactions.
+func (c *ClientImpl) TransactionUpdateAuthorization(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
+	authorizedAddressStr string, alias string, authorizedAlias string, authorize bool) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	authorizedAddress, err := xdr.IDFromHexString(authorizedAddressStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to parse the authorized address")
+	}
+
+	upb := UpdateAuthorizationBuilder{}
+	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
+	transaction, err := upb.
+		Address(address).
+		Authorize(authorizedAddress, authorizedAlias, authorize).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	// fmt.Println(string(b))
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionLookup calls the endpoint: /v1/channels/{channel_id}/transactions/{id}.
+func (c *ClientImpl) TransactionLookup(channelID string, transactionID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions/%s", c.serverSelector.Pick(), version, channelID, transactionID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?{blockHeight}.
+func (c *ClientImpl) TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by height endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?{blockID}.
+func (c *ClientImpl) TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by blockid endpoint")
+	}
+
+	return response, nil
+}
+
+// ReceiptLookup calls the endpoint: /v1/channels/{channel_id}/receipts/{id}.
+func (c *ClientImpl) ReceiptLookup(channelID, transactionID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/receipts/%s", c.serverSelector.Pick(), version, channelID, transactionID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to receipts lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// BlockLookup calls the endpoint: /v1/channels/{channel_id}/blocks/{id}.
+func (c *ClientImpl) BlockLookup(channelID, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks/%s", c.serverSelector.Pick(), version, channelID, blockID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to block lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// BlockList calls the endpoint: /v1/channels/{channel_id}/blocks?{number,height}.
+func (c *ClientImpl) BlockList(channelID string, blockHeight int, number int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks?height=%d&number=%d", c.serverSelector.Pick(), version, channelID, blockHeight, number)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to block by height lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// BlockHeaderLookup calls the endpoint: /v1/channels/{channel_id}/blockheaders/{id}.
+func (c *ClientImpl) BlockHeaderLookup(channelID, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders/%s", c.serverSelector.Pick(), version, channelID, blockID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to blockheaders lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/blockheaders?{blockHeight,number}.
+func (c *ClientImpl) BlockHeaderList(channelID string, blockHeight int, number int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?height=%d&number=%d", c.serverSelector.Pick(), version, channelID, blockHeight, number)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to blockheaders by blockheight lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// ChannelLookup calls the endpoint: /v1/channels/{channel_id}.
+func (c *ClientImpl) ChannelLookup(channelID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// ChannelAbi calls the endpoint: /v1/channels/{channel_id}/abi.
+func (c *ClientImpl) ChannelAbi(channelID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/abi", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// BlockHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
+func (c *ClientImpl) BlockHeight(channelID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/blocks/height", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// AccountLookup calls the endpoint: /v1/channels/{channel_id}/accounts/{accout_id}.
+func (c *ClientImpl) AccountLookup(channelID string, seed string) (*xdr.Response, error) {
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s", c.serverSelector.Pick(), version, channelID, hex.EncodeToString(address[:]))
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to channel lookup endpoint")
+	}
+
+	return response, nil
+}
+
+func makeRequest(httpClient *http.Client, method, url string, body io.Reader) (*xdr.Response, error) {
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
+	fmt.Println(url)
+
+	req, err := http.NewRequestWithContext(context.Background(), method, url, body)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to create a new request")
 	}
@@ -299,18 +391,34 @@ func makeRequest(httpClient *http.Client, url string, xdrRequest []byte) ([]byte
 		}
 	}()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("status code is not OK")
+	switch resp.StatusCode {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return nil, ErrNotFound
+	case http.StatusInternalServerError:
+		return nil, ErrInternalServer
+	default:
+		responseBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not read the body")
+		}
+
+		return nil, fmt.Errorf("http status %d - %s", resp.StatusCode, string(responseBody))
 	}
 
-	b64Resp, err := io.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not read the body")
 	}
 
-	binaryResp, err := base64.StdEncoding.DecodeString(string(b64Resp))
+	fmt.Println(string(responseBody))
+	fmt.Println("--------------------------------------------------------------------------------------------------------")
+
+	responseXDR := xdr.Response{}
+	err = responseXDR.UnmarshalJSON(responseBody)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to unmarshal binary response")
+		return nil, errors.Wrap(err, "could not unmarshal the body")
 	}
-	return binaryResp, nil
+
+	return &responseXDR, nil
 }

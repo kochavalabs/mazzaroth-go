@@ -7,26 +7,36 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/stretchr/testify/require"
 )
 
-func TestUpdatePermissionBuilder(t *testing.T) {
+func TestUpdateAuthorizationBuilder(t *testing.T) {
+	authorizedAlias := "the authorized alias"
+	authorized := true
+	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
 	testAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	testChannel, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(publicKey)
 	privateKey := ed25519.NewKeyFromSeed(seed)
 	action := xdr.Action{
-		Address:   testAddress,
-		ChannelID: testChannel,
-		Nonce:     0,
-        BlockExpirationNumber: 1,
+		Address:               testAddress,
+		ChannelID:             testChannel,
+		Nonce:                 0,
+		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
 			Type: xdr.ActionCategoryTypeUPDATE,
 			Update: &xdr.Update{
-				Type: xdr.UpdateTypePERMISSION,
-				Permission: &xdr.Permission{
-					Action: 1,
-					Key:    testAddress,
+				Type: xdr.UpdateTypeACCOUNT,
+				Account: &xdr.AccountUpdate{
+					Type: xdr.AccountUpdateTypeAUTHORIZATION,
+					Authorization: &xdr.Authorization{
+						Account: xdr.AuthorizedAccount{
+							Key:   authorizedAddress,
+							Alias: authorizedAlias,
+						},
+						Authorize: authorized,
+					},
 				},
 			},
 		},
@@ -44,13 +54,15 @@ func TestUpdatePermissionBuilder(t *testing.T) {
 		Signature: signature,
 		Action:    action,
 	}
-	ub := new(UpdatePermissionBuilder)
+	ub := new(UpdateAuthorizationBuilder)
 	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
-		Action(1).
-		Address(testAddress).Sign(privateKey)
+		Address(testAddress).
+		Authorize(authorizedAddress, authorizedAlias, authorized).
+		Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}
+	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}

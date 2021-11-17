@@ -22,7 +22,7 @@ func Transaction() *TransactionBuilder {
 func (txb *TransactionBuilder) Authority(address *xdr.ID) *TransactionBuilder {
 	if address != nil {
 		txb.authority = &xdr.Authority{
-			Type:   xdr.AuthorityTypePERMISSIONED,
+			Type:   xdr.AuthorityTypeAUTHORIZED,
 			Origin: address,
 		}
 	}
@@ -47,7 +47,7 @@ func (txb *TransactionBuilder) UpdateContract(address, channel *xdr.ID, nonce, b
 	return updateContractBuilder.UpdateContract(address, channel, nonce, blockExpirationNumber)
 }
 
-func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdatePermissionBuilder {
-	updatePermissionBuilder := new(UpdatePermissionBuilder)
+func (txb *TransactionBuilder) UpdatePermission(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *UpdateAuthorizationBuilder {
+	updatePermissionBuilder := new(UpdateAuthorizationBuilder)
 	return updatePermissionBuilder.UpdatePermission(address, channel, nonce, blockExpirationNumber)
 }
