@@ -256,7 +256,7 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err := client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[1].Key[:]))
+	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[0].Key[:]))
 	require.Equal(t, "the authorized alias", accountLookupResponse.Account.AuthorizedAccounts[0].Alias)
 
 	// Unauthorize a key.
@@ -280,7 +280,7 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err = client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, 1, len(accountLookupResponse.Account.AuthorizedAccounts))
+	require.Equal(t, 0, len(accountLookupResponse.Account.AuthorizedAccounts))
 
 	// Check channel abi.
 	abiResponse, err := client.ChannelAbi(channelStr)
