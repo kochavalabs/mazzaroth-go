@@ -17,6 +17,12 @@ import (
 
 const version = "v1"
 
+// ErrNotFound is raised when the searched entity is not found.
+var ErrNotFound = errors.New("entity not found")
+
+// ErrInternalServer is raised after a 500 status code.
+var ErrInternalServer = errors.New("internal server error")
+
 var _ Client = &ClientImpl{}
 
 // ClientImpl is the actual client implementation.
@@ -51,10 +57,155 @@ func (c *ClientImpl) TransactionSubmit(transaction *xdr.Transaction) (*xdr.Respo
 		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
 
-	channelID := hex.EncodeToString(transaction.Data.ChannelID[:])
+	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
 	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionSubmitContract calls the endpoint: /v1/channels/{channel_id}/transactions for Contract update transactions.
+func (c *ClientImpl) TransactionSubmitContract(channelID string, seed string, contractBytes []byte, abiDef []byte, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	// Load the ABI.
+	var abi xdr.Abi
+	err = json.NewDecoder(bytes.NewReader(abiDef)).Decode(&abi)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode abi")
+	}
+
+	// Create the transaction.
+	ucb := UpdateContractBuilder{}
+
+	transaction, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockExpirationNumber).
+		Version(version).
+		Abi(abi).
+		Contract(contractBytes).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionSubmitConfig calls the endpoint: /v1/channels/{channel_id}/transactions for Config update transactions.
+func (c *ClientImpl) TransactionSubmitConfig(channelID string, seed string, owner string, nonce uint64, blockExpirationNumber uint64) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	ucb := UpdateConfigBuilder{}
+	ucb.UpdateConfig(&address, &channel, uint64(nonce), blockExpirationNumber)
+	transaction, err := ucb.
+		Owner(&address).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
+
+	response, err := makeRequest(c.httpClient, http.MethodPost, url, bytes.NewReader(b))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction submit endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionUpdateAuthorization calls the endpoint: /v1/channels/{channel_id}/transactions for Authorization update transactions.
+func (c *ClientImpl) TransactionUpdateAuthorization(channelID string, seed string, nonce uint64, blockExpirationNumber uint64,
+	authorizedAddressStr string, alias string, authorizedAlias string, authorize bool) (*xdr.Response, error) {
+	channel, err := xdr.IDFromHexString(channelID)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to extract channel id")
+	}
+
+	seedBin, err := hex.DecodeString(seed)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to decode seed")
+	}
+
+	privateKey := ed25519.NewKeyFromSeed(seedBin)
+	address, err := xdr.IDFromPublicKey(privateKey.Public())
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create private key")
+	}
+
+	authorizedAddress, err := xdr.IDFromHexString(authorizedAddressStr)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to parse the authorized address")
+	}
+
+	upb := UpdateAuthorizationBuilder{}
+	upb.UpdatePermission(&address, &channel, uint64(nonce), blockExpirationNumber)
+	transaction, err := upb.
+		Address(address).
+		Authorize(authorizedAddress, authorizedAlias, authorize).
+		Sign(privateKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to sign the action")
+	}
+
+	b, err := json.Marshal(transaction)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to marshal to json")
+	}
+
+	// fmt.Println(string(b))
 
 	url := fmt.Sprintf("%s/%s/channels/%s/transactions", c.serverSelector.Pick(), version, channelID)
 
@@ -73,6 +224,30 @@ func (c *ClientImpl) TransactionLookup(channelID string, transactionID string) (
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make a request to transaction lookup endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?{blockHeight}.
+func (c *ClientImpl) TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by height endpoint")
+	}
+
+	return response, nil
+}
+
+// TransactionLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?{blockID}.
+func (c *ClientImpl) TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
+
+	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by blockid endpoint")
 	}
 
 	return response, nil

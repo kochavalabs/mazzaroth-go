@@ -8,48 +8,49 @@ import (
 )
 
 type CallBuilder struct {
-	sender                *xdr.ID
-	channel               *xdr.ID
+	address, channel      *xdr.ID
 	nonce                 uint64
 	blockExpirationNumber uint64
 	functionName          string
 	arguments             []xdr.Argument
+	signer                *xdr.Authority
 }
 
-// Call
-func (cb *CallBuilder) Call(sender, channel *xdr.ID, nonce, blockExpirationNumber uint64) *CallBuilder {
-	cb.sender = sender
+//Call
+func (cb *CallBuilder) Call(address, channel *xdr.ID, nonce, blockExpirationNumber uint64) *CallBuilder {
+	cb.address = address
 	cb.channel = channel
 	cb.nonce = nonce
 	cb.blockExpirationNumber = blockExpirationNumber
 	return cb
 }
 
-// Function
+//Function
 func (cb *CallBuilder) Function(name string) *CallBuilder {
 	cb.functionName = name
 	return cb
 }
 
-// Arguments
+//Arguments
 func (cb *CallBuilder) Arguments(arguments ...xdr.Argument) *CallBuilder {
 	cb.arguments = arguments
 	return cb
 }
 
-// Sign
+//Sign
 func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 	// check required values
 	if len(cb.functionName) <= 0 {
 		return nil, ErrEmptyFunctionName
 	}
 
-	data := xdr.Data{
+	action := xdr.Action{
+		Address:               *cb.address,
 		ChannelID:             *cb.channel,
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
-		Category: xdr.Category{
-			Type: xdr.CategoryTypeCALL,
+		Category: xdr.ActionCategory{
+			Type: xdr.ActionCategoryTypeCALL,
 			Call: &xdr.Call{
 				Function:  cb.functionName,
 				Arguments: cb.arguments,
@@ -57,28 +58,25 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 		},
 	}
 
-	dataBytes, err := data.MarshalBinary()
+	actionStream, err := action.MarshalBinary()
 	if err != nil {
-		return nil, errors.Wrap(err, "in data.MarshalBinary")
+		return nil, errors.Wrap(err, "in action.MarshalBinary")
 	}
 
-	signer, err := xdr.IDFromPublicKey(pk.Public())
-	if err != nil {
-		return nil, errors.Wrap(err, "in xdr.IDFromPublicKey")
-	}
+	signatureSlice := ed25519.Sign(pk, actionStream)
 
-	signatureSlice := ed25519.Sign(pk, dataBytes)
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		return nil, errors.Wrap(err, "in signing the transaction")
 	}
 
 	transaction := &xdr.Transaction{
-		Sender:    *cb.sender,
-		Signer:    signer,
 		Signature: signature,
-		Data:      data,
+		Action:    action,
 	}
 
+	if cb.signer != nil {
+		transaction.Signer = *cb.signer
+	}
 	return transaction, nil
 }
