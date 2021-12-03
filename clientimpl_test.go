@@ -1,5 +1,4 @@
 // +build integration
-
 package mazzaroth
 
 import (
