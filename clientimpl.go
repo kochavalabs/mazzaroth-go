@@ -17,12 +17,6 @@ import (
 
 const version = "v1"
 
-// ErrNotFound is raised when the searched entity is not found.
-var ErrNotFound = errors.New("entity not found")
-
-// ErrInternalServer is raised after a 500 status code.
-var ErrInternalServer = errors.New("internal server error")
-
 var _ Client = &ClientImpl{}
 
 // ClientImpl is the actual client implementation.
@@ -57,7 +51,7 @@ func (c *ClientImpl) TransactionSubmit(transaction *xdr.Transaction) (*xdr.Respo
 		return nil, errors.Wrap(err, "unable to marshal to json")
 	}
 
-	channelID := hex.EncodeToString(transaction.Action.ChannelID[:])
+	channelID := hex.EncodeToString(transaction.Data.ChannelID[:])
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to unmarshal the channelID")
 	}
@@ -79,30 +73,6 @@ func (c *ClientImpl) TransactionLookup(channelID string, transactionID string) (
 	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to make a request to transaction lookup endpoint")
-	}
-
-	return response, nil
-}
-
-// TransactionLookupByBlockHeight calls the endpoint: /v1/channels/{channel_id}/transactions?{blockHeight}.
-func (c *ClientImpl) TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockheight=%d", c.serverSelector.Pick(), version, channelID, blockHeight)
-
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by height endpoint")
-	}
-
-	return response, nil
-}
-
-// TransactionLookupByBlockID calls the endpoint: /v1/channels/{channel_id}/transactions?{blockID}.
-func (c *ClientImpl) TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/transactions?blockid=%s", c.serverSelector.Pick(), version, channelID, blockID)
-
-	response, err := makeRequest(c.httpClient, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to make a request to transaction lookup by blockid endpoint")
 	}
 
 	return response, nil

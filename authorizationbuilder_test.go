@@ -7,27 +7,31 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/stretchr/testify/require"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestUpdateAuthorizationBuilder(t *testing.T) {
+	authorized := true
+	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
-
 	seed, _ := hex.DecodeString(seedstr)
 	privateKey := ed25519.NewKeyFromSeed(seed)
+
 	testAddress, err := xdr.IDFromPublicKey(privateKey.Public())
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCALL,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.CategoryTypeAUTHORIZATION,
+			Authorization: &xdr.Authorization{
+				Account:   authorizedAddress,
+				Authorize: authorized,
 			},
 		},
 	}
@@ -50,15 +54,17 @@ func TestCallBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	ub := new(AuthorizationBuilder)
+	tx, err := ub.Authorization(&testAddress, &testChannel, 0, 1).
+		Account(&authorizedAddress).
+		Authorize(authorized).
+		Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}
