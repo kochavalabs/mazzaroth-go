@@ -29,9 +29,9 @@ func (cfgb *ConfigBuilder) Owner(address *xdr.ID) *ConfigBuilder {
 	return cfgb
 }
 
-func (cfgb *ConfigBuilder) Admins(addresses ...*xdr.ID) *ConfigBuilder {
+func (cfgb *ConfigBuilder) Admins(addresses ...xdr.ID) *ConfigBuilder {
 	for _, address := range addresses {
-		cfgb.adminAddresses = append(cfgb.adminAddresses, *address)
+		cfgb.adminAddresses = append(cfgb.adminAddresses, address)
 	}
 	return cfgb
 }
