@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdateAuthorizationBuilder(t *testing.T) {
+func TestAuthorizationBuilder(t *testing.T) {
 	authorized := true
 	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
@@ -54,8 +54,8 @@ func TestUpdateAuthorizationBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	ub := new(AuthorizationBuilder)
-	tx, err := ub.Authorization(&testAddress, &testChannel, 0, 1).
+	ab := new(AuthorizationBuilder)
+	tx, err := ab.Authorization(&testAddress, &testChannel, 0, 1).
 		Account(&authorizedAddress).
 		Authorize(authorized).
 		Sign(privateKey)

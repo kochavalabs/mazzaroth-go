@@ -9,7 +9,7 @@ import (
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
-func TestUpdateConfigBuilder(t *testing.T) {
+func TestConfigBuilder(t *testing.T) {
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(seedstr)
@@ -51,8 +51,8 @@ func TestUpdateConfigBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	ucb := new(ConfigBuilder)
-	tx, err := ucb.Config(&testAddress, &testChannel, 0, 1).
+	cb := new(ConfigBuilder)
+	tx, err := cb.Config(&testAddress, &testChannel, 0, 1).
 		Owner(&testAddress).
 		Admins(&testAddress).Sign(privateKey)
 

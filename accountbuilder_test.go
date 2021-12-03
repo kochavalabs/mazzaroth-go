@@ -6,11 +6,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/stretchr/testify/require"
 )
 
-func TestContractBuilder(t *testing.T) {
+func TestAccountBuilder(t *testing.T) {
+	alias := "test"
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(seedstr)
@@ -20,34 +21,25 @@ func TestContractBuilder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	hasher := &crypto.Sha3_256Hasher{}
-	hash := hasher.Hash([]byte("example"))
-	xdrHash, err := xdr.HashFromSlice(hash)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCONTRACT,
-			Contract: &xdr.Contract{
-				ContractBytes: []byte("example"),
-				ContractHash:  xdrHash,
-				Version:       "1",
-				Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
+			Type: xdr.CategoryTypeACCOUNT,
+			Account: &xdr.Account{
+				Alias: alias,
 			},
 		},
 	}
 
-	dataStream, err := data.MarshalBinary()
+	dataBytes, err := data.MarshalBinary()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	signatureSlice := ed25519.Sign(privateKey, dataStream)
+	signatureSlice := ed25519.Sign(privateKey, dataBytes)
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		t.Fatal(err)
@@ -60,15 +52,16 @@ func TestContractBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	cb := new(ContractBuilder)
-	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
-		ContractBytes([]byte("example")).
-		Version("1").Abi(&xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
+	ab := new(AccountBuilder)
+	tx, err := ab.Account(&testAddress, &testChannel, 0, 1).
+		Alias("test").
+		Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}
