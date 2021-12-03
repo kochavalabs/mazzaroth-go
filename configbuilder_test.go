@@ -54,7 +54,7 @@ func TestConfigBuilder(t *testing.T) {
 	cb := new(ConfigBuilder)
 	tx, err := cb.Config(&testAddress, &testChannel, 0, 1).
 		Owner(&testAddress).
-		Admins(&testAddress).Sign(privateKey)
+		Admins(testAddress).Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)
