@@ -13,4 +13,9 @@ var (
 	ErrChannelIDNil = errors.New("action channel id can not be nil")
 	//ErrEmptyFunction name triggered if an empty function name is used to sign a call transaction
 	ErrEmptyFunctionName = errors.New("function name can not be empty")
+	// ErrNotFound is raised when the searched entity is not found.
+	ErrNotFound = errors.New("entity not found")
+
+	// ErrInternalServer is raised after a 500 status code.
+	ErrInternalServer = errors.New("internal server error")
 )

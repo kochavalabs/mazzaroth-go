@@ -6,38 +6,48 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestUpdateContractBuilder(t *testing.T) {
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
-
 	seed, _ := hex.DecodeString(seedstr)
 	privateKey := ed25519.NewKeyFromSeed(seed)
+
 	testAddress, err := xdr.IDFromPublicKey(privateKey.Public())
 	if err != nil {
 		t.Fatal(err)
 	}
+	hasher := &crypto.Sha3_256Hasher{}
+	hash := hasher.Hash([]byte("example"))
+	xdrHash, err := xdr.HashFromSlice(hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCALL,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.CategoryTypeCONTRACT,
+			Contract: &xdr.Contract{
+				ContractBytes: []byte("example"),
+				ContractHash:  xdrHash,
+				Version:       "1",
+				Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
 			},
 		},
 	}
 
-	dataBytes, err := data.MarshalBinary()
+	dataStream, err := data.MarshalBinary()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	signatureSlice := ed25519.Sign(privateKey, dataBytes)
+	signatureSlice := ed25519.Sign(privateKey, dataStream)
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		t.Fatal(err)
@@ -50,10 +60,10 @@ func TestCallBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	cb := new(ContractBuilder)
+	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
+		ContractBytes([]byte("example")).
+		Version("1").Abi(&xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)
