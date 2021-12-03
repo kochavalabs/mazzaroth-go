@@ -9,7 +9,7 @@ import (
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestUpdateConfigBuilder(t *testing.T) {
 	testAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	testChannel, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
@@ -21,10 +21,13 @@ func TestCallBuilder(t *testing.T) {
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
-			Type: 1,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.ActionCategoryTypeUPDATE,
+			Update: &xdr.Update{
+				Type: xdr.UpdateTypeCONFIG,
+				ChannelConfig: &xdr.ChannelConfig{
+					Owner:  testAddress,
+					Admins: []xdr.ID{testAddress},
+				},
 			},
 		},
 	}
@@ -41,10 +44,10 @@ func TestCallBuilder(t *testing.T) {
 		Signature: signature,
 		Action:    action,
 	}
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	ucb := new(UpdateConfigBuilder)
+	tx, err := ucb.UpdateConfig(&testAddress, &testChannel, 0, 1).
+		Owner(&testAddress).
+		Admins(&testAddress).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}

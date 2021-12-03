@@ -7,6 +7,8 @@ import "github.com/kochavalabs/mazzaroth-xdr/xdr"
 type Client interface {
 	TransactionSubmit(transaction *xdr.Transaction) (*xdr.Response, error)
 	TransactionLookup(channelID string, transactionID string) (*xdr.Response, error)
+	TransactionLookupByBlockHeight(channelID string, blockHeight int) (*xdr.Response, error)
+	TransactionLookupByBlockID(channelID string, blockID string) (*xdr.Response, error)
 	ReceiptLookup(channelID string, transactionID string) (*xdr.Response, error)
 	BlockLookup(channelID string, blockID string) (*xdr.Response, error)
 	BlockList(channelID string, blockHeight int, number int) (*xdr.Response, error)

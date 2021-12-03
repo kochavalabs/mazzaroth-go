@@ -6,25 +6,37 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestUpdateContractBuilder(t *testing.T) {
 	testAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	testChannel, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(publicKey)
 	privateKey := ed25519.NewKeyFromSeed(seed)
+	hasher := &crypto.Sha3_256Hasher{}
+	hash := hasher.Hash([]byte("example"))
+	xdrHash, err := xdr.HashFromSlice(hash)
+	if err != nil {
+		t.Fatal(err)
+	}
 	action := xdr.Action{
 		Address:               testAddress,
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
-			Type: 1,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.ActionCategoryTypeUPDATE,
+			Update: &xdr.Update{
+				Type: xdr.UpdateTypeCONTRACT,
+				Contract: &xdr.Contract{
+					ContractBytes: []byte("example"),
+					ContractHash:  xdrHash,
+					Version:       "1",
+					Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
+				},
 			},
 		},
 	}
@@ -41,10 +53,10 @@ func TestCallBuilder(t *testing.T) {
 		Signature: signature,
 		Action:    action,
 	}
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	ub := new(UpdateContractBuilder)
+	tx, err := ub.UpdateContract(&testAddress, &testChannel, 0, 1).
+		Contract([]byte("example")).
+		Version("1").Abi(xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}

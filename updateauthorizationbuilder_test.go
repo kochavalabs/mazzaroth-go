@@ -7,9 +7,13 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/stretchr/testify/require"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestUpdateAuthorizationBuilder(t *testing.T) {
+	authorizedAlias := "the authorized alias"
+	authorized := true
+	authorizedAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000001"))
 	testAddress, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	testChannel, _ := xdr.IDFromSlice([]byte("00000000000000000000000000000000"))
 	publicKey := "0000000000000000000000000000000000000000000000000000000000000000"
@@ -21,10 +25,19 @@ func TestCallBuilder(t *testing.T) {
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.ActionCategory{
-			Type: 1,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.ActionCategoryTypeUPDATE,
+			Update: &xdr.Update{
+				Type: xdr.UpdateTypeACCOUNT,
+				Account: &xdr.AccountUpdate{
+					Type: xdr.AccountUpdateTypeAUTHORIZATION,
+					Authorization: &xdr.Authorization{
+						Account: xdr.AuthorizedAccount{
+							Key:   authorizedAddress,
+							Alias: authorizedAlias,
+						},
+						Authorize: authorized,
+					},
+				},
 			},
 		},
 	}
@@ -41,13 +54,15 @@ func TestCallBuilder(t *testing.T) {
 		Signature: signature,
 		Action:    action,
 	}
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	ub := new(UpdateAuthorizationBuilder)
+	tx, err := ub.UpdatePermission(&testAddress, &testChannel, 0, 1).
+		Address(testAddress).
+		Authorize(authorizedAddress, authorizedAlias, authorized).
+		Sign(privateKey)
 	if err != nil {
 		t.Fatal(err)
 	}
+	require.Equal(t, wantTx, tx)
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}
