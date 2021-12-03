@@ -3,21 +3,22 @@ package mazzaroth
 import (
 	"crypto/ed25519"
 
+	"github.com/kochavalabs/crypto"
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 	"github.com/pkg/errors"
 )
 
-type CallBuilder struct {
+type ContractBuilder struct {
 	sender                *xdr.ID
 	channel               *xdr.ID
 	nonce                 uint64
 	blockExpirationNumber uint64
-	functionName          string
-	arguments             []xdr.Argument
+	contractBytes         []byte
+	abi                   *xdr.Abi
+	version               string
 }
 
-// Call
-func (cb *CallBuilder) Call(sender, channel *xdr.ID, nonce, blockExpirationNumber uint64) *CallBuilder {
+func (cb *ContractBuilder) Contract(sender, channel *xdr.ID, nonce, blockExpirationNumber uint64) *ContractBuilder {
 	cb.sender = sender
 	cb.channel = channel
 	cb.nonce = nonce
@@ -25,23 +26,32 @@ func (cb *CallBuilder) Call(sender, channel *xdr.ID, nonce, blockExpirationNumbe
 	return cb
 }
 
-// Function
-func (cb *CallBuilder) Function(name string) *CallBuilder {
-	cb.functionName = name
+func (cb *ContractBuilder) ContractBytes(b []byte) *ContractBuilder {
+	cb.contractBytes = b
 	return cb
 }
 
-// Arguments
-func (cb *CallBuilder) Arguments(arguments ...xdr.Argument) *CallBuilder {
-	cb.arguments = arguments
+func (cb *ContractBuilder) Version(version string) *ContractBuilder {
+	cb.version = version
 	return cb
 }
 
-// Sign
-func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
-	// check required values
-	if len(cb.functionName) <= 0 {
-		return nil, ErrEmptyFunctionName
+func (cb *ContractBuilder) Abi(abi *xdr.Abi) *ContractBuilder {
+	cb.abi = abi
+	return cb
+}
+
+func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
+	if (len(cb.contractBytes) < 0) || cb.version == "" || cb.abi == nil {
+		return nil, errors.New("missing require fields")
+	}
+
+	hasher := &crypto.Sha3_256Hasher{}
+	hash := hasher.Hash(cb.contractBytes)
+
+	xdrHash, err := xdr.HashFromSlice(hash)
+	if err != nil {
+		return nil, errors.New("unable to create contract hash")
 	}
 
 	data := xdr.Data{
@@ -49,10 +59,12 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCALL,
-			Call: &xdr.Call{
-				Function:  cb.functionName,
-				Arguments: cb.arguments,
+			Type: xdr.CategoryTypeCONTRACT,
+			Contract: &xdr.Contract{
+				ContractBytes: cb.contractBytes,
+				ContractHash:  xdrHash,
+				Version:       cb.version,
+				Abi:           *cb.abi,
 			},
 		},
 	}
@@ -68,6 +80,7 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 	}
 
 	signatureSlice := ed25519.Sign(pk, dataBytes)
+
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
 		return nil, errors.Wrap(err, "in signing the transaction")

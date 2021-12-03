@@ -98,8 +98,8 @@ func waitForReceipt(channelStr string, transactionIDstr string) {
 func setOwner(blockHeight uint64) {
 	nonce := mathrand.Intn(100000000000000)
 
-	ucb := UpdateConfigBuilder{}
-	ucb.UpdateConfig(&address, &channel, uint64(nonce), blockHeight+10)
+	ucb := ConfigBuilder{}
+	ucb.Config(&address, &channel, uint64(nonce), blockHeight+10)
 	transaction, err := ucb.
 		Owner(&address).
 		Sign(privateKey)
@@ -141,12 +141,12 @@ func uploadContract(blockHeight uint64) {
 	nonce := mathrand.Intn(100000000000000)
 
 	// Create the transaction.
-	ucb := UpdateContractBuilder{}
+	ucb := ContractBuilder{}
 
-	txTransacion, err := ucb.UpdateContract(&address, &channel, uint64(nonce), blockHeight).
+	txTransacion, err := ucb.Contract(&address, &channel, uint64(nonce), blockHeight).
 		Version(version).
-		Abi(abi).
-		Contract(contract).
+		Abi(&abi).
+		ContractBytes(contract).
 		Sign(privateKey)
 	if err != nil {
 		log.Fatal(err)
@@ -169,7 +169,7 @@ func TestIntegrationTest(t *testing.T) {
 
 	channelResponse, err := client.ChannelLookup(channelStr)
 	require.NoError(t, err)
-	require.Equal(t, xdr.ResponseTypeCHANNEL, channelResponse.Type)
+	require.Equal(t, xdr.ResponseTypeCONFIG, channelResponse.Type)
 
 	var transactionStr string
 
@@ -178,9 +178,8 @@ func TestIntegrationTest(t *testing.T) {
 		nonce := uint64(mathrand.Intn(100))
 		blockExpirationNumber++
 
-		builder := TransactionBuilder{}
-		transaction, err := builder.
-			Call(&address, &channel, nonce, blockExpirationNumber).
+		transaction, err := Transaction(&address, &channel).
+			Call(nonce, blockExpirationNumber).
 			Function("args").
 			Arguments([]xdr.Argument{String("a"), String("b"), String("c")}...).
 			Sign(privateKey)
@@ -232,16 +231,16 @@ func TestIntegrationTest(t *testing.T) {
 	// Channel lookup.
 	channelLookupResponse, err := client.ChannelLookup(channelStr)
 	require.NoError(t, err)
-	require.Equal(t, xdr.ResponseTypeCHANNEL, channelLookupResponse.Type)
+	require.Equal(t, xdr.ResponseTypeCONFIG, channelLookupResponse.Type)
 
 	// Authorize a key.
 	nonce := uint64(mathrand.Intn(100))
 	blockExpirationNumber++
-	authorizedAlias := "the authorized alias"
 
-	authBuilder := UpdateAuthorizationBuilder{}
-	transaction, err := authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
-		Authorize(authorizedAddress, authorizedAlias, true).
+	authBuilder := AuthorizationBuilder{}
+	transaction, err := authBuilder.Authorization(&address, &channel, nonce, blockExpirationNumber).
+		Account(&authorizedAddress).
+		Authorize(true).
 		Sign(privateKey)
 	require.NoError(t, err)
 
@@ -256,16 +255,14 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err := client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, "0000000000000000000000000000000000000000000000000000000000000001", hex.EncodeToString(accountLookupResponse.Account.AuthorizedAccounts[0].Key[:]))
-	require.Equal(t, "the authorized alias", accountLookupResponse.Account.AuthorizedAccounts[0].Alias)
 
 	// Unauthorize a key.
 	nonce = uint64(mathrand.Intn(100))
 	blockExpirationNumber++
-	authorizedAlias = "the authorized alias"
 
-	transaction, err = authBuilder.UpdatePermission(&address, &channel, nonce, blockExpirationNumber).
-		Authorize(authorizedAddress, authorizedAlias, false).
+	transaction, err = authBuilder.Authorization(&address, &channel, nonce, blockExpirationNumber).
+		Account(&authorizedAddress).
+		Authorize(false).
 		Sign(privateKey)
 	require.NoError(t, err)
 
@@ -280,7 +277,6 @@ func TestIntegrationTest(t *testing.T) {
 	accountLookupResponse, err = client.AccountLookup(channelStr, seedStr)
 	require.NoError(t, err)
 	require.Equal(t, xdr.ResponseTypeACCOUNT, accountLookupResponse.Type)
-	require.Equal(t, 0, len(accountLookupResponse.Account.AuthorizedAccounts))
 
 	// Check channel abi.
 	abiResponse, err := client.ChannelAbi(channelStr)

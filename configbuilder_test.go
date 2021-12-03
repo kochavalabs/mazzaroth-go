@@ -9,25 +9,26 @@ import (
 	"github.com/kochavalabs/mazzaroth-xdr/xdr"
 )
 
-func TestCallBuilder(t *testing.T) {
+func TestConfigBuilder(t *testing.T) {
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
-
 	seed, _ := hex.DecodeString(seedstr)
 	privateKey := ed25519.NewKeyFromSeed(seed)
+
 	testAddress, err := xdr.IDFromPublicKey(privateKey.Public())
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCALL,
-			Call: &xdr.Call{
-				Function:  "test",
-				Arguments: []xdr.Argument{"1"},
+			Type: xdr.CategoryTypeCONFIG,
+			Config: &xdr.Config{
+				Owner:  testAddress,
+				Admins: []xdr.ID{testAddress},
 			},
 		},
 	}
@@ -50,15 +51,14 @@ func TestCallBuilder(t *testing.T) {
 		Data:      data,
 	}
 
-	cb := new(CallBuilder)
-	tx, err := cb.Call(&testAddress, &testChannel, 0, 1).
-		Function("test").
-		Arguments([]xdr.Argument{Int32(1)}...).Sign(privateKey)
+	cb := new(ConfigBuilder)
+	tx, err := cb.Config(&testAddress, &testChannel, 0, 1).
+		Owner(&testAddress).
+		Admins(testAddress).Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if !reflect.DeepEqual(wantTx, tx) {
 		t.Fatalf("expected: %v, got: %v", wantTx, tx)
 	}
