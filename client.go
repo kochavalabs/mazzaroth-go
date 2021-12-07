@@ -10,7 +10,7 @@ import (
 // endpoints exposed by a mazzaroth readonly node.
 type Client interface {
 	AccountLookup(ctx context.Context, channelID string, accountID string) (*xdr.Account, error)
-	AuthorizationLookup(ctx context.Context, channelID string, accountID string) (*xdr.Authorization, error)
+	AuthorizationLookup(ctx context.Context, channelID string, accountID string) (*xdr.Authorized, error)
 	BlockHeaderLookup(ctx context.Context, channelID string, blockID string) (*xdr.BlockHeader, error)
 	BlockHeaderList(ctx context.Context, channelID string, blockHeight int, number int) (*[]xdr.BlockHeader, error)
 	BlockHeight(ctx context.Context, channelID string) (*xdr.BlockHeight, error)

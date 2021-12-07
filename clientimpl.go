@@ -40,7 +40,6 @@ func NewMazzarothClient(servers []string, options ...Options) (*ClientImpl, erro
 
 // AccountLookup calls the endpoint: /v1/channels/{channel_id}/accounts/{account_id}.
 func (c *ClientImpl) AccountLookup(ctx context.Context, channelID string, accountID string) (*xdr.Account, error) {
-
 	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s", c.address, version, channelID, accountID)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
@@ -55,8 +54,19 @@ func (c *ClientImpl) AccountLookup(ctx context.Context, channelID string, accoun
 	return nil, errors.New("Missing account")
 }
 
-func (c *ClientImpl) AuthorizationLookup(ctx context.Context, channelID string, accountID string) (*xdr.Authorization, error) {
-	return nil, nil
+// AuthroizationLookup calls the endpoing: /v1/channels/{channel_id}/accounts/{account_id}/authorized
+func (c *ClientImpl) AuthorizationLookup(ctx context.Context, channelID string, accountID string) (*xdr.Authorized, error) {
+	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s/authorized", c.address, version, channelID, accountID)
+
+	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "uable to handle http response")
+	}
+
+	if xdrResp.Authorized != nil {
+		return xdrResp.Authorized, nil
+	}
+	return nil, errors.New("missing authorized accounts")
 }
 
 // BlockHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
@@ -231,7 +241,6 @@ func (c *ClientImpl) TransactionLookup(ctx context.Context, channelID string, tr
 }
 
 func (c *ClientImpl) do(ctx context.Context, url string, method string, body []byte) (*xdr.Response, error) {
-
 	req, err := http.NewRequestWithContext(context.Background(), method, url, bytes.NewReader(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to create a new request")
