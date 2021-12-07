@@ -149,9 +149,9 @@ func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, bloc
 	return nil, errors.New("Missing blockHeaders")
 }
 
-// ChannelLookup calls the endpoint: /v1/channels/{channel_id}.
+// ChannelLookup calls the endpoint: /v1/channels/{channel_id}/config.
 func (c *ClientImpl) ChannelLookup(ctx context.Context, channelID string) (*xdr.Config, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s", c.address, version, channelID)
+	url := fmt.Sprintf("%s/%s/channels/%s/config", c.address, version, channelID)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
 	if err != nil {
