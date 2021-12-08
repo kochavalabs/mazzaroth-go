@@ -24,7 +24,7 @@ type ClientImpl struct {
 }
 
 // NewMazzarothClient creates a production object.
-func NewMazzarothClient(servers []string, options ...Options) (*ClientImpl, error) {
+func NewMazzarothClient(options ...Options) (*ClientImpl, error) {
 	clientOptions := defaultOption()
 
 	// set all options if supplied
@@ -150,7 +150,7 @@ func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, bloc
 }
 
 // ChannelLookup calls the endpoint: /v1/channels/{channel_id}/config.
-func (c *ClientImpl) ChannelLookup(ctx context.Context, channelID string) (*xdr.Config, error) {
+func (c *ClientImpl) ChannelConfig(ctx context.Context, channelID string) (*xdr.Config, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/config", c.address, version, channelID)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
