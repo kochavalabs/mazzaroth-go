@@ -1,5 +1,3 @@
-// +build OS_JS_TARGET_WASM
-
 package main
 
 import (

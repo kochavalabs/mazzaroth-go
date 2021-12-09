@@ -1,5 +1,3 @@
-// +build OS_JS_TARGET_WASM
-
 package main
 
 import (
@@ -19,6 +17,7 @@ func mazzarothClient(this js.Value, args []js.Value) interface{} {
 			return err.Error()
 		}
 	}
+
 	wrapperClient := &mazzarothJsWrapperClient{
 		client: client,
 	}
@@ -43,12 +42,19 @@ func mazzarothClient(this js.Value, args []js.Value) interface{} {
 func transactionBuilder(this js.Value, args []js.Value) interface{} {
 	txBuilder := &transactionBuilderJsWrapper{}
 	return js.ValueOf(map[string]interface{}{
-		"Account": txBuilder.Account(),
+		"Account":       txBuilder.account(),
+		"Authorization": txBuilder.authorization(),
+		"Call":          txBuilder.call(),
+		"Config":        txBuilder.config(),
+		"Contract":      txBuilder.contract(),
 	})
 }
 
 func main() {
+	c := make(chan struct{})
 	js.Global().Set("NewMazzarothClient", js.FuncOf(mazzarothClient))
 	js.Global().Set("TransactionBuilder", js.FuncOf(transactionBuilder))
+
+	<-c
 	// Must keep go program alive when instantiated to allow access to functions
 }

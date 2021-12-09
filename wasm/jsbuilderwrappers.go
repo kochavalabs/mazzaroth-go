@@ -1,5 +1,3 @@
-// +build OS_JS_TARGET_WASM
-
 package main
 
 import (
@@ -110,6 +108,66 @@ func authorizationAuthorize(authorizationBuilder *mazzaroth.AuthorizationBuilder
 }
 
 func authorizationSign(authorizationBuilder *mazzaroth.AuthorizationBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func callFunction(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func callArguments(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func callSign(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func contractBytes(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func contractVersion(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func contractAbi(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func contractSign(callBuilder *mazzaroth.CallBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func configOwner(configBuilder *mazzaroth.ConfigBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func configAdmins(configBuilder *mazzaroth.ConfigBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return nil
+	})
+}
+
+func configSign(configBuilder *mazzaroth.ConfigBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		return nil
 	})
