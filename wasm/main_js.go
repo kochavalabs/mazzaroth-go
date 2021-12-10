@@ -22,7 +22,6 @@ func mazzarothClient(this js.Value, args []js.Value) interface{} {
 		client: client,
 	}
 
-	// list of client functions
 	return js.ValueOf(map[string]interface{}{
 		"AccountLookup":       wrapperClient.accountLookup(),
 		"AuthorizationLookup": wrapperClient.authorizationLookup(),
@@ -54,7 +53,5 @@ func main() {
 	c := make(chan struct{})
 	js.Global().Set("NewMazzarothClient", js.FuncOf(mazzarothClient))
 	js.Global().Set("TransactionBuilder", js.FuncOf(transactionBuilder))
-
 	<-c
-	// Must keep go program alive when instantiated to allow access to functions
 }
