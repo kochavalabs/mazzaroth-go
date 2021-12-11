@@ -8,18 +8,17 @@ import (
 
 func callFunction(callBuilder *mazzaroth.CallBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		return nil
+		callBuilder.Function(args[0].String())
+		return map[string]interface{}{
+			"Arguments": callArguments(callBuilder),
+		}
 	})
 }
 
 func callArguments(callBuilder *mazzaroth.CallBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		return nil
-	})
-}
-
-func callSign(callBuilder *mazzaroth.CallBuilder) js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		return nil
+		return map[string]interface{}{
+			"Sign": sign(callBuilder),
+		}
 	})
 }
