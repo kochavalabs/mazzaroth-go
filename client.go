@@ -17,7 +17,7 @@ type Client interface {
 	BlockLookup(ctx context.Context, channelID string, blockID string) (*xdr.Block, error)
 	BlockList(ctx context.Context, channelID string, blockHeight int, number int) (*[]xdr.Block, error)
 	ChannelAbi(ctx context.Context, channelID string) (*xdr.Abi, error)
-	ChannelLookup(ctx context.Context, channelID string) (*xdr.Config, error)
+	ChannelConfig(ctx context.Context, channelID string) (*xdr.Config, error)
 	ReceiptLookup(ctx context.Context, channelID string, transactionID string) (*xdr.Receipt, error)
 	TransactionLookup(ctx context.Context, channelID string, transactionID string) (*xdr.Transaction, error)
 	TransactionSubmit(ctx context.Context, transaction *xdr.Transaction) (*xdr.ID, *xdr.Receipt, error)
