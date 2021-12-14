@@ -1,5 +1,5 @@
 {
     "files.exclude": {
-        "wasm": true    // this excludes the folder
+        "wasm": true    
     }
  }
