@@ -42,7 +42,7 @@ func (ab *AuthorizationBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, e
 		return nil, errors.New("missing account")
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             *ab.channel,
 		Nonce:                 ab.nonce,
 		BlockExpirationNumber: ab.blockExpirationNumber,

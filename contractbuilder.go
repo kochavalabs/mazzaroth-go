@@ -54,7 +54,7 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 		return nil, errors.New("unable to create contract hash")
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             *cb.channel,
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
@@ -64,7 +64,7 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 				ContractBytes: cb.contractBytes,
 				ContractHash:  xdrHash,
 				Version:       cb.version,
-				Abi:           *cb.abi,
+				Abi:           cb.abi,
 			},
 		},
 	}

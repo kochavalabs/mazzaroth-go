@@ -22,7 +22,7 @@ func TestAccountBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,

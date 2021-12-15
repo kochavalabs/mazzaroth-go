@@ -27,7 +27,7 @@ func TestContractBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
@@ -37,7 +37,7 @@ func TestContractBuilder(t *testing.T) {
 				ContractBytes: []byte("example"),
 				ContractHash:  xdrHash,
 				Version:       "1",
-				Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
+				Abi:           &xdr.Abi{Functions: []*xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
 			},
 		},
 	}
@@ -63,7 +63,7 @@ func TestContractBuilder(t *testing.T) {
 	cb := new(ContractBuilder)
 	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
 		ContractBytes([]byte("example")).
-		Version("1").Abi(&xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
+		Version("1").Abi(&xdr.Abi{Functions: []*xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)

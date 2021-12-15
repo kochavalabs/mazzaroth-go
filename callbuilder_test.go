@@ -19,7 +19,7 @@ func TestCallBuilder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,

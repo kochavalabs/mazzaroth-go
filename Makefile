@@ -1,9 +1,7 @@
 .PHONY: $(MAKECMDGOALS)
 
 test:
-	go test ./... -count=1
+	go test -v ./... 
 
-integration:
-	go test ./... -count=1 -tags=integration
-
-testall: test integration
+build-wasm:
+	GOOS=js GOARCH=wasm go build -o ./bin/mazzarothclient.wasm ./wasm/*.go

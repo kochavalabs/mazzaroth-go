@@ -44,7 +44,7 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 		return nil, ErrEmptyFunctionName
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             *cb.channel,
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
