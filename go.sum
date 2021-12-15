@@ -2,8 +2,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/kochavalabs/crypto v0.0.0-20210414182029-6a8321e05fdc h1:OaMOjAZN//rK7fPvynOzieupjbxl5lwxk/3u1YvE//U=
 github.com/kochavalabs/crypto v0.0.0-20210414182029-6a8321e05fdc/go.mod h1:qTHYQRl9gCAPCCXxCxpMbeNU7nV5VyFgMfPMDHcYlXA=
-github.com/kochavalabs/mazzaroth-xdr v0.7.0 h1:mAVEsgI+psyYUh/61ThYk0tVI1cYxV97hayT3mFBWgM=
-github.com/kochavalabs/mazzaroth-xdr v0.7.0/go.mod h1:U8ldrJUaYONdpe2NwsGyNKY+OpFHwXpz8313by5kxtw=
+github.com/kochavalabs/mazzaroth-xdr v0.7.1 h1:qB4HZNhaW+2hl+UpORQcv8qVvoaUsSk95HtInAJLH5Q=
+github.com/kochavalabs/mazzaroth-xdr v0.7.1/go.mod h1:U8ldrJUaYONdpe2NwsGyNKY+OpFHwXpz8313by5kxtw=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

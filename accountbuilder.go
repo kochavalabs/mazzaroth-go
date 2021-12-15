@@ -33,7 +33,7 @@ func (acctb *AccountBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, erro
 		return nil, errors.New("missing require fields")
 	}
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             *acctb.channel,
 		Nonce:                 acctb.nonce,
 		BlockExpirationNumber: acctb.blockExpirationNumber,

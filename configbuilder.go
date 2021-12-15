@@ -38,7 +38,7 @@ func (cfgb *ConfigBuilder) Admins(addresses ...xdr.ID) *ConfigBuilder {
 
 func (cfgb *ConfigBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 
-	data := xdr.Data{
+	data := &xdr.Data{
 		ChannelID:             *cfgb.channel,
 		Nonce:                 cfgb.nonce,
 		BlockExpirationNumber: cfgb.blockExpirationNumber,
