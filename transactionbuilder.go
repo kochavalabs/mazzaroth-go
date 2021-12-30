@@ -1,7 +1,7 @@
 package mazzaroth
 
 import (
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 // TransactionBuilder builds a xdr transaction object. This is a helper struct
@@ -19,24 +19,9 @@ func Transaction(sender, channel *xdr.ID) *TransactionBuilder {
 	}
 }
 
-// Acount
-func (txb *TransactionBuilder) Account(nonce, blockExpirationNumber uint64) *AccountBuilder {
-	return new(AccountBuilder).Account(txb.sender, txb.channel, nonce, blockExpirationNumber)
-}
-
-// Authorization
-func (txb *TransactionBuilder) Authorization(nonce, blockExpirationNumber uint64) *AuthorizationBuilder {
-	return new(AuthorizationBuilder).Authorization(txb.sender, txb.channel, nonce, blockExpirationNumber)
-}
-
 // Call
 func (txb *TransactionBuilder) Call(nonce, blockExpirationNumber uint64) *CallBuilder {
 	return new(CallBuilder).Call(txb.sender, txb.channel, nonce, blockExpirationNumber)
-}
-
-// Config
-func (txb *TransactionBuilder) Config(nonce, blockExpirationNumber uint64) *ConfigBuilder {
-	return new(ConfigBuilder).Config(txb.sender, txb.channel, nonce, blockExpirationNumber)
 }
 
 // Contract

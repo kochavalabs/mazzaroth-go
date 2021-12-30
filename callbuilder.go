@@ -3,7 +3,7 @@ package mazzaroth
 import (
 	"crypto/ed25519"
 
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +44,7 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 		return nil, ErrEmptyFunctionName
 	}
 
-	data := &xdr.Data{
+	data := xdr.Data{
 		ChannelID:             *cb.channel,
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
@@ -62,11 +62,6 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 		return nil, errors.Wrap(err, "in data.MarshalBinary")
 	}
 
-	signer, err := xdr.IDFromPublicKey(pk.Public())
-	if err != nil {
-		return nil, errors.Wrap(err, "in xdr.IDFromPublicKey")
-	}
-
 	signatureSlice := ed25519.Sign(pk, dataBytes)
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
 	if err != nil {
@@ -75,7 +70,6 @@ func (cb *CallBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
 
 	transaction := &xdr.Transaction{
 		Sender:    *cb.sender,
-		Signer:    signer,
 		Signature: signature,
 		Data:      data,
 	}

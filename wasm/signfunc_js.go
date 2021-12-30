@@ -6,7 +6,7 @@ import (
 	"syscall/js"
 
 	"github.com/kochavalabs/crypto"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 type signer interface {

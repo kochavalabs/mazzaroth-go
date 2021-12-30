@@ -5,12 +5,12 @@ import (
 	"syscall/js"
 
 	"github.com/kochavalabs/mazzaroth-go"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 func contractAbi(contractBuilder *mazzaroth.ContractBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		abi := &xdr.Abi{}
+		abi := xdr.Abi{}
 		if err := json.Unmarshal([]byte(args[0].String()), abi); err != nil {
 			return err.Error()
 		}

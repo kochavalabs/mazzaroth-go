@@ -4,7 +4,7 @@ import (
 	"crypto/ed25519"
 
 	"github.com/kochavalabs/crypto"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 	"github.com/pkg/errors"
 )
 
@@ -14,7 +14,7 @@ type ContractBuilder struct {
 	nonce                 uint64
 	blockExpirationNumber uint64
 	contractBytes         []byte
-	abi                   *xdr.Abi
+	abi                   xdr.Abi
 	version               string
 }
 
@@ -36,13 +36,13 @@ func (cb *ContractBuilder) Version(version string) *ContractBuilder {
 	return cb
 }
 
-func (cb *ContractBuilder) Abi(abi *xdr.Abi) *ContractBuilder {
+func (cb *ContractBuilder) Abi(abi xdr.Abi) *ContractBuilder {
 	cb.abi = abi
 	return cb
 }
 
 func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error) {
-	if (len(cb.contractBytes) < 0) || cb.version == "" || cb.abi == nil {
+	if (len(cb.contractBytes) < 0) || cb.version == "" {
 		return nil, errors.New("missing require fields")
 	}
 
@@ -54,12 +54,12 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 		return nil, errors.New("unable to create contract hash")
 	}
 
-	data := &xdr.Data{
+	data := xdr.Data{
 		ChannelID:             *cb.channel,
 		Nonce:                 cb.nonce,
 		BlockExpirationNumber: cb.blockExpirationNumber,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCONTRACT,
+			Type: xdr.CategoryTypeDEPLOY,
 			Contract: &xdr.Contract{
 				ContractBytes: cb.contractBytes,
 				ContractHash:  xdrHash,
@@ -74,11 +74,6 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 		return nil, errors.Wrap(err, "in data.MarshalBinary")
 	}
 
-	signer, err := xdr.IDFromPublicKey(pk.Public())
-	if err != nil {
-		return nil, errors.Wrap(err, "in xdr.IDFromPublicKey")
-	}
-
 	signatureSlice := ed25519.Sign(pk, dataBytes)
 
 	signature, err := xdr.SignatureFromSlice(signatureSlice)
@@ -88,7 +83,6 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 
 	transaction := &xdr.Transaction{
 		Sender:    *cb.sender,
-		Signer:    signer,
 		Signature: signature,
 		Data:      data,
 	}

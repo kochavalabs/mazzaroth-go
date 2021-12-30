@@ -23,29 +23,23 @@ func mazzarothClient(this js.Value, args []js.Value) interface{} {
 	}
 
 	return js.ValueOf(map[string]interface{}{
-		"AccountLookup":       wrapperClient.accountLookup(),
-		"AuthorizationLookup": wrapperClient.authorizationLookup(),
-		"BlockHeaderLookup":   wrapperClient.blockHeaderLookup(),
-		"BlockHeaderList":     wrapperClient.blockHeaderList(),
-		"BlockHeight":         wrapperClient.blockHeight(),
-		"BlockLookup":         wrapperClient.blockLookup(),
-		"BlockList":           wrapperClient.blockList(),
-		"ChannelAbi":          wrapperClient.channelAbi(),
-		"ChannelConfig":       wrapperClient.channelConfig(),
-		"ReceiptLookup":       wrapperClient.receiptLookup(),
-		"TransactionLookup":   wrapperClient.transactionLookup(),
-		"TransactionSubmit":   wrapperClient.transactionSubmit(),
+		"BlockHeaderLookup": wrapperClient.blockHeaderLookup(),
+		"BlockHeaderList":   wrapperClient.blockHeaderList(),
+		"BlockHeight":       wrapperClient.blockHeight(),
+		"BlockLookup":       wrapperClient.blockLookup(),
+		"BlockList":         wrapperClient.blockList(),
+		"ChannelAbi":        wrapperClient.channelAbi(),
+		"ReceiptLookup":     wrapperClient.receiptLookup(),
+		"TransactionLookup": wrapperClient.transactionLookup(),
+		"TransactionSubmit": wrapperClient.transactionSubmit(),
 	})
 }
 
 func transactionBuilder(this js.Value, args []js.Value) interface{} {
 	txBuilder := &transactionBuilderJsWrapper{}
 	return js.ValueOf(map[string]interface{}{
-		"Account":       txBuilder.account(),
-		"Authorization": txBuilder.authorization(),
-		"Call":          txBuilder.call(),
-		"Config":        txBuilder.config(),
-		"Contract":      txBuilder.contract(),
+		"Call":     txBuilder.call(),
+		"Contract": txBuilder.contract(),
 	})
 }
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/kochavalabs/crypto"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 func TestContractBuilder(t *testing.T) {
@@ -27,17 +27,17 @@ func TestContractBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data := &xdr.Data{
+	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
 		Category: xdr.Category{
-			Type: xdr.CategoryTypeCONTRACT,
+			Type: xdr.CategoryTypeDEPLOY,
 			Contract: &xdr.Contract{
 				ContractBytes: []byte("example"),
 				ContractHash:  xdrHash,
 				Version:       "1",
-				Abi:           &xdr.Abi{Functions: []*xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
+				Abi:           xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}},
 			},
 		},
 	}
@@ -55,7 +55,6 @@ func TestContractBuilder(t *testing.T) {
 
 	wantTx := &xdr.Transaction{
 		Sender:    testAddress,
-		Signer:    testAddress,
 		Signature: signature,
 		Data:      data,
 	}
@@ -63,7 +62,7 @@ func TestContractBuilder(t *testing.T) {
 	cb := new(ContractBuilder)
 	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
 		ContractBytes([]byte("example")).
-		Version("1").Abi(&xdr.Abi{Functions: []*xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
+		Version("1").Abi(xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}).Sign(privateKey)
 
 	if err != nil {
 		t.Fatal(err)

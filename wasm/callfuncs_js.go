@@ -4,7 +4,7 @@ import (
 	"syscall/js"
 
 	"github.com/kochavalabs/mazzaroth-go"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 func callFunction(callBuilder *mazzaroth.CallBuilder) js.Func {
