@@ -40,7 +40,9 @@ func (tb *transactionBuilderJsWrapper) contract() js.Func {
 		}
 		contractBuilder.Contract(&signer, &channel, uint64(args[2].Int()), uint64(args[3].Int()))
 		return map[string]interface{}{
-			"ContractBytes": contractBytes(contractBuilder),
+			"Deploy": deploy(contractBuilder),
+			"Delete": delete(contractBuilder),
+			"Pause":  pause(contractBuilder),
 		}
 	})
 }

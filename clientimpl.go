@@ -71,7 +71,7 @@ func (c *ClientImpl) BlockLookup(ctx context.Context, channelID, blockID string)
 }
 
 // BlockList calls the endpoint: /v1/channels/{channel_id}/blocks?{number,height}.
-func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeight int, number int) (*[]xdr.Block, error) {
+func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeight int, number int) ([]xdr.Block, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks?height=%d&number=%d", c.address, version, channelID, blockHeight, number)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
@@ -80,7 +80,7 @@ func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeigh
 	}
 
 	if xdrResp.Blocks != nil {
-		return xdrResp.Blocks, nil
+		return *xdrResp.Blocks, nil
 	}
 
 	return nil, errors.New("Missing blocks")
@@ -103,7 +103,7 @@ func (c *ClientImpl) BlockHeaderLookup(ctx context.Context, channelID, blockID s
 }
 
 // BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/blockheaders?{blockHeight,number}.
-func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, blockHeight int, number int) (*[]xdr.BlockHeader, error) {
+func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, blockHeight int, number int) ([]xdr.BlockHeader, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?height=%d&number=%d", c.address, version, channelID, blockHeight, number)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
@@ -112,7 +112,7 @@ func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, bloc
 	}
 
 	if xdrResp.BlockHeaders != nil {
-		return xdrResp.BlockHeaders, nil
+		return *xdrResp.BlockHeaders, nil
 	}
 
 	return nil, errors.New("Missing blockHeaders")
