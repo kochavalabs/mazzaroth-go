@@ -7,45 +7,13 @@ import (
 	"time"
 
 	"github.com/kochavalabs/mazzaroth-go"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 const timeout = 10 * time.Second
 
 type mazzarothJsWrapperClient struct {
 	client mazzaroth.Client
-}
-
-func (m *mazzarothJsWrapperClient) accountLookup() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		account, err := m.client.AccountLookup(ctx, args[0].String(), args[1].String())
-		if err != nil {
-			return err.Error()
-		}
-		acctJson, err := json.Marshal(account)
-		if err != nil {
-			return err.Error()
-		}
-		return js.ValueOf(string(acctJson))
-	})
-}
-
-func (m *mazzarothJsWrapperClient) authorizationLookup() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		auth, err := m.client.AuthorizationLookup(ctx, args[0].String(), args[1].String())
-		if err != nil {
-			return err.Error()
-		}
-		authJson, err := json.Marshal(auth)
-		if err != nil {
-			return err.Error()
-		}
-		return js.ValueOf(string(authJson))
-	})
 }
 
 func (m *mazzarothJsWrapperClient) blockHeaderLookup() js.Func {
@@ -141,22 +109,6 @@ func (m *mazzarothJsWrapperClient) channelAbi() js.Func {
 			return err.Error()
 		}
 		return js.ValueOf(string(channelAbiJson))
-	})
-}
-
-func (m *mazzarothJsWrapperClient) channelConfig() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		channelConfig, err := m.client.ChannelConfig(ctx, args[0].String())
-		if err != nil {
-			return err.Error()
-		}
-		channelConfigJson, err := json.Marshal(channelConfig)
-		if err != nil {
-			return err.Error()
-		}
-		return js.ValueOf(string(channelConfigJson))
 	})
 }
 

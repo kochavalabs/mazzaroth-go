@@ -2,37 +2,42 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"syscall/js"
 
 	"github.com/kochavalabs/mazzaroth-go"
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
-func contractAbi(contractBuilder *mazzaroth.ContractBuilder) js.Func {
+func delete(contractBuilder *mazzaroth.ContractBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		return map[string]interface{}{
+			"Sign": sign(contractBuilder),
+		}
+	})
+}
+
+func deploy(contractBuilder *mazzaroth.ContractBuilder) js.Func {
+	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) < 3 {
+			return errors.New("missing arguments")
+		}
+		version := args[0].String()
 		abi := &xdr.Abi{}
-		if err := json.Unmarshal([]byte(args[0].String()), abi); err != nil {
+		if err := json.Unmarshal([]byte(args[1].String()), abi); err != nil {
 			return err.Error()
 		}
-		contractBuilder.Abi(abi)
+		contractBytes := []byte(args[2].String())
+		contractBuilder.Deploy(version, *abi, contractBytes)
 		return map[string]interface{}{
-			"ContractBytes": contractVersion(contractBuilder),
+			"Sign": sign(contractBuilder),
 		}
 	})
 }
 
-func contractBytes(contractBuilder *mazzaroth.ContractBuilder) js.Func {
+func pause(contractBuilder *mazzaroth.ContractBuilder) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		contractBuilder.ContractBytes([]byte(args[0].String()))
-		return map[string]interface{}{
-			"Version": contractVersion(contractBuilder),
-		}
-	})
-}
-
-func contractVersion(contractBuilder *mazzaroth.ContractBuilder) js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		contractBuilder.Version(args[0].String())
+		contractBuilder.Pause(args[0].Bool())
 		return map[string]interface{}{
 			"Sign": sign(contractBuilder),
 		}

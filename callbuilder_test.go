@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 )
 
 func TestCallBuilder(t *testing.T) {
@@ -19,7 +19,7 @@ func TestCallBuilder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data := &xdr.Data{
+	data := xdr.Data{
 		ChannelID:             testChannel,
 		Nonce:                 0,
 		BlockExpirationNumber: 1,
@@ -45,7 +45,6 @@ func TestCallBuilder(t *testing.T) {
 
 	wantTx := &xdr.Transaction{
 		Sender:    testAddress,
-		Signer:    testAddress,
 		Signature: signature,
 		Data:      data,
 	}

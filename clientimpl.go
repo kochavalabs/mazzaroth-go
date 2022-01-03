@@ -9,7 +9,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kochavalabs/mazzaroth-xdr/xdr"
+	"github.com/kochavalabs/mazzaroth-xdr/go-xdr/xdr"
 	"github.com/pkg/errors"
 )
 
@@ -36,37 +36,6 @@ func NewMazzarothClient(options ...Options) (*ClientImpl, error) {
 		httpClient: clientOptions.httpClient,
 		address:    clientOptions.address,
 	}, nil
-}
-
-// AccountLookup calls the endpoint: /v1/channels/{channel_id}/accounts/{account_id}.
-func (c *ClientImpl) AccountLookup(ctx context.Context, channelID string, accountID string) (*xdr.Account, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s", c.address, version, channelID, accountID)
-
-	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to handle http response")
-	}
-
-	if xdrResp.Account != nil {
-		return xdrResp.Account, nil
-	}
-
-	return nil, errors.New("Missing account")
-}
-
-// AuthorizationLookup calls the endpoint: /v1/channels/{channel_id}/accounts/{account_id}/authorized
-func (c *ClientImpl) AuthorizationLookup(ctx context.Context, channelID string, accountID string) (*xdr.Authorized, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/accounts/%s/authorized", c.address, version, channelID, accountID)
-
-	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to handle http response")
-	}
-
-	if xdrResp.Authorized != nil {
-		return xdrResp.Authorized, nil
-	}
-	return nil, errors.New("missing authorized accounts")
 }
 
 // BlockHeight calls the endpoint: /v1/channels/{channel_id}/blocks/height.
@@ -102,7 +71,7 @@ func (c *ClientImpl) BlockLookup(ctx context.Context, channelID, blockID string)
 }
 
 // BlockList calls the endpoint: /v1/channels/{channel_id}/blocks?{number,height}.
-func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeight int, number int) ([]*xdr.Block, error) {
+func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeight int, number int) ([]xdr.Block, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blocks?height=%d&number=%d", c.address, version, channelID, blockHeight, number)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
@@ -111,7 +80,7 @@ func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeigh
 	}
 
 	if xdrResp.Blocks != nil {
-		return xdrResp.Blocks, nil
+		return *xdrResp.Blocks, nil
 	}
 
 	return nil, errors.New("Missing blocks")
@@ -134,7 +103,7 @@ func (c *ClientImpl) BlockHeaderLookup(ctx context.Context, channelID, blockID s
 }
 
 // BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/blockheaders?{blockHeight,number}.
-func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, blockHeight int, number int) ([]*xdr.BlockHeader, error) {
+func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, blockHeight int, number int) ([]xdr.BlockHeader, error) {
 	url := fmt.Sprintf("%s/%s/channels/%s/blockheaders?height=%d&number=%d", c.address, version, channelID, blockHeight, number)
 
 	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
@@ -143,26 +112,10 @@ func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, bloc
 	}
 
 	if xdrResp.BlockHeaders != nil {
-		return xdrResp.BlockHeaders, nil
+		return *xdrResp.BlockHeaders, nil
 	}
 
 	return nil, errors.New("Missing blockHeaders")
-}
-
-// ChannelLookup calls the endpoint: /v1/channels/{channel_id}/config.
-func (c *ClientImpl) ChannelConfig(ctx context.Context, channelID string) (*xdr.Config, error) {
-	url := fmt.Sprintf("%s/%s/channels/%s/config", c.address, version, channelID)
-
-	xdrResp, err := c.do(ctx, url, http.MethodGet, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "unable to handle http response")
-	}
-
-	if xdrResp.Config != nil {
-		return xdrResp.Config, nil
-	}
-
-	return nil, errors.New("Missing channel config")
 }
 
 // ChannelAbi calls the endpoint: /v1/channels/{channel_id}/abi.
