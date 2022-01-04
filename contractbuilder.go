@@ -16,7 +16,7 @@ type ContractBuilder struct {
 	blockExpirationNumber uint64
 	pause                 bool
 	contractBytes         []byte
-	abi                   xdr.Abi
+	abi                   *xdr.Abi
 	version               string
 }
 
@@ -33,7 +33,7 @@ func (cb *ContractBuilder) Delete() *ContractBuilder {
 	return cb
 }
 
-func (cb *ContractBuilder) Deploy(version string, abi xdr.Abi, b []byte) *ContractBuilder {
+func (cb *ContractBuilder) Deploy(version string, abi *xdr.Abi, b []byte) *ContractBuilder {
 	cb.categoryType = xdr.CategoryTypeDEPLOY
 	cb.contractBytes = b
 	cb.version = version
@@ -81,7 +81,7 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 					ContractBytes: cb.contractBytes,
 					ContractHash:  xdrHash,
 					Version:       cb.version,
-					Abi:           cb.abi,
+					Abi:           *cb.abi,
 				},
 			},
 		}
