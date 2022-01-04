@@ -51,7 +51,7 @@ func (c *ClientImpl) BlockHeight(ctx context.Context, channelID string) (*xdr.Bl
 		return xdrResp.Height, nil
 	}
 
-	return nil, errors.New("Missing block height")
+	return nil, errors.New("missing block height")
 }
 
 // BlockLookup calls the endpoint: /v1/channels/{channel_id}/blocks/{id}.
@@ -67,7 +67,7 @@ func (c *ClientImpl) BlockLookup(ctx context.Context, channelID, blockID string)
 		return xdrResp.Block, nil
 	}
 
-	return nil, errors.New("Missing block")
+	return nil, errors.New("missing block")
 }
 
 // BlockList calls the endpoint: /v1/channels/{channel_id}/blocks?{number,height}.
@@ -83,7 +83,7 @@ func (c *ClientImpl) BlockList(ctx context.Context, channelID string, blockHeigh
 		return *xdrResp.Blocks, nil
 	}
 
-	return nil, errors.New("Missing blocks")
+	return nil, errors.New("missing blocks")
 }
 
 // BlockHeaderLookup calls the endpoint: /v1/channels/{channel_id}/blockheaders/{id}.
@@ -99,7 +99,7 @@ func (c *ClientImpl) BlockHeaderLookup(ctx context.Context, channelID, blockID s
 		return xdrResp.BlockHeader, nil
 	}
 
-	return nil, errors.New("Missing blockheader")
+	return nil, errors.New("missing blockheader")
 }
 
 // BlockHeaderList calls the endpoint: /v1/channels/{channel_id}/blockheaders?{blockHeight,number}.
@@ -115,7 +115,7 @@ func (c *ClientImpl) BlockHeaderList(ctx context.Context, channelID string, bloc
 		return *xdrResp.BlockHeaders, nil
 	}
 
-	return nil, errors.New("Missing blockHeaders")
+	return nil, errors.New("missing blockHeaders")
 }
 
 // ChannelAbi calls the endpoint: /v1/channels/{channel_id}/abi.
@@ -131,7 +131,7 @@ func (c *ClientImpl) ChannelAbi(ctx context.Context, channelID string) (*xdr.Abi
 		return xdrResp.Abi, nil
 	}
 
-	return nil, errors.New("Missing channel abi")
+	return nil, errors.New("missing channel abi")
 }
 
 // ReceiptLookup calls the endpoint: /v1/channels/{channel_id}/receipts/{id}.
@@ -147,7 +147,7 @@ func (c *ClientImpl) ReceiptLookup(ctx context.Context, channelID, transactionID
 		return xdrResp.Receipt, nil
 	}
 
-	return nil, errors.New("Missing receipt")
+	return nil, errors.New("missing receipt")
 }
 
 // TransactionSubmit calls the endpoint: /v1/channels/{channel_id}/transactions.
