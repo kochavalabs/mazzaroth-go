@@ -28,7 +28,7 @@ func deploy(contractBuilder *mazzaroth.ContractBuilder) js.Func {
 			return err.Error()
 		}
 		contractBytes := []byte(args[2].String())
-		contractBuilder.Deploy(version, *abi, contractBytes)
+		contractBuilder.Deploy(version, abi, contractBytes)
 		return map[string]interface{}{
 			"Sign": sign(contractBuilder),
 		}
