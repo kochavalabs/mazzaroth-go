@@ -61,7 +61,7 @@ func TestContractBuilderDeploy(t *testing.T) {
 
 	cb := new(ContractBuilder)
 	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
-		Deploy("1", xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}, []byte("example")).
+		Deploy("1", &xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}, []byte("example")).
 		Sign(privateKey)
 
 	if err != nil {
