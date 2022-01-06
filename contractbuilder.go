@@ -14,6 +14,7 @@ type ContractBuilder struct {
 	channel               *xdr.ID
 	nonce                 uint64
 	blockExpirationNumber uint64
+	owner                 xdr.ID
 	pause                 bool
 	contractBytes         []byte
 	abi                   *xdr.Abi
@@ -33,8 +34,9 @@ func (cb *ContractBuilder) Delete() *ContractBuilder {
 	return cb
 }
 
-func (cb *ContractBuilder) Deploy(version string, abi *xdr.Abi, b []byte) *ContractBuilder {
+func (cb *ContractBuilder) Deploy(owner xdr.ID, version string, abi *xdr.Abi, b []byte) *ContractBuilder {
 	cb.categoryType = xdr.CategoryTypeDEPLOY
+	cb.owner = owner
 	cb.contractBytes = b
 	cb.version = version
 	cb.abi = abi
@@ -78,6 +80,7 @@ func (cb *ContractBuilder) Sign(pk ed25519.PrivateKey) (*xdr.Transaction, error)
 			Category: xdr.Category{
 				Type: xdr.CategoryTypeDEPLOY,
 				Contract: &xdr.Contract{
+					Owner:         cb.owner,
 					ContractBytes: cb.contractBytes,
 					ContractHash:  xdrHash,
 					Version:       cb.version,
