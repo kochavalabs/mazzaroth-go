@@ -22,13 +22,17 @@ func deploy(contractBuilder *mazzaroth.ContractBuilder) js.Func {
 		if len(args) < 3 {
 			return errors.New("missing arguments")
 		}
-		version := args[0].String()
-		abi := &xdr.Abi{}
-		if err := json.Unmarshal([]byte(args[1].String()), abi); err != nil {
+		owner, err := xdr.IDFromHexString(args[0].String())
+		if err != nil {
 			return err.Error()
 		}
-		contractBytes := []byte(args[2].String())
-		contractBuilder.Deploy(version, abi, contractBytes)
+		version := args[1].String()
+		abi := &xdr.Abi{}
+		if err := json.Unmarshal([]byte(args[2].String()), abi); err != nil {
+			return err.Error()
+		}
+		contractBytes := []byte(args[3].String())
+		contractBuilder.Deploy(owner, version, abi, contractBytes)
 		return map[string]interface{}{
 			"Sign": sign(contractBuilder),
 		}

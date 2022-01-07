@@ -12,6 +12,7 @@ import (
 
 func TestContractBuilderDeploy(t *testing.T) {
 	testChannel, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
+	testOwner, _ := xdr.IDFromSlice([]byte("0000000000000000000000000000000000000000000000000000000000000000"))
 	seedstr := "0000000000000000000000000000000000000000000000000000000000000000"
 	seed, _ := hex.DecodeString(seedstr)
 	privateKey := ed25519.NewKeyFromSeed(seed)
@@ -34,6 +35,7 @@ func TestContractBuilderDeploy(t *testing.T) {
 		Category: xdr.Category{
 			Type: xdr.CategoryTypeDEPLOY,
 			Contract: &xdr.Contract{
+				Owner:         testOwner,
 				ContractBytes: []byte("example"),
 				ContractHash:  xdrHash,
 				Version:       "1",
@@ -61,7 +63,7 @@ func TestContractBuilderDeploy(t *testing.T) {
 
 	cb := new(ContractBuilder)
 	tx, err := cb.Contract(&testAddress, &testChannel, 0, 1).
-		Deploy("1", &xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}, []byte("example")).
+		Deploy(testOwner, "1", &xdr.Abi{Functions: []xdr.FunctionSignature{{FunctionType: xdr.FunctionTypeREAD, FunctionName: "Test"}}}, []byte("example")).
 		Sign(privateKey)
 
 	if err != nil {
