@@ -52,6 +52,6 @@ func defaultOption() *mazzarothClientOptions {
 		httpClient: &http.Client{
 			Timeout: 500 * time.Millisecond,
 		},
-		address: "localhost:8080",
+		address: "http://localhost:6299",
 	}
 }
