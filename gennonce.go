@@ -7,13 +7,13 @@ import (
 )
 
 var randNonce *rand.Rand
+var once sync.Once
 
 func seedRand() {
 	randNonce = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 func GenerateNonce() uint64 {
-	var once sync.Once
 	once.Do(seedRand)
 	return randNonce.Uint64()
 }
