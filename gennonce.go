@@ -6,12 +6,14 @@ import (
 	"time"
 )
 
+var randNonce *rand.Rand
+
 func seedRand() {
-	rand.Seed(time.Now().UnixNano())
+	randNonce = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
 func GenerateNonce() uint64 {
 	var once sync.Once
 	once.Do(seedRand)
-	return rand.Uint64()
+	return randNonce.Uint64()
 }
